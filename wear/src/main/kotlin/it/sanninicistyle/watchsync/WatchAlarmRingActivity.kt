@@ -51,7 +51,9 @@ import androidx.wear.compose.material3.Text
 import it.sanninicistyle.watchsync.shared.DiagLog
 import it.sanninicistyle.watchsync.shared.MirroredAlarm
 import it.sanninicistyle.watchsync.ui.BodyStyle
+import it.sanninicistyle.watchsync.ui.GlowHalo
 import it.sanninicistyle.watchsync.ui.LabelStyle
+import it.sanninicistyle.watchsync.ui.haloColors
 import it.sanninicistyle.watchsync.ui.TimeStyle
 import it.sanninicistyle.watchsync.ui.WatchIcons
 import it.sanninicistyle.watchsync.ui.Ws
@@ -125,18 +127,8 @@ private fun Pill(color: Color, width: Float, height: Float, onClick: () -> Unit,
     ) { content() }
 }
 
-/** Two amber rings breathing out from the centre, half a cycle apart. */
+/** The glowing halo along the edge of the screen while the alarm rings. */
 @Composable
 private fun Rings() {
-    val t = rememberInfiniteTransition(label = "rings")
-    val a by t.animateFloat(0f, 1f, infiniteRepeatable(tween(2200, easing = LinearOutSlowInEasing), RepeatMode.Restart), label = "a")
-    Canvas(Modifier.fillMaxSize().padding(4.dp)) {
-        listOf(a, (a + 0.5f) % 1f).forEach { p ->
-            drawCircle(
-                color = Ws.Amber.copy(alpha = 0.6f * (1f - p)),
-                radius = size.minDimension / 2f * (0.7f + 0.3f * p),
-                style = Stroke(width = 3.dp.toPx()),
-            )
-        }
-    }
+    GlowHalo(haloColors(Ws.Amber), Modifier.fillMaxSize().padding(8.dp), thickness = 4.dp, glow = 14.dp)
 }

@@ -44,7 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import it.sanninicistyle.watchsync.shared.MirroredAlarm
 import it.sanninicistyle.watchsync.shared.PeerInfo
+import it.sanninicistyle.watchsync.ui.GlowHalo
 import it.sanninicistyle.watchsync.ui.PressableSurface
+import it.sanninicistyle.watchsync.ui.haloColors
 import it.sanninicistyle.watchsync.ui.WsIcons
 import it.sanninicistyle.watchsync.ui.theme.WatchSyncTheme
 import it.sanninicistyle.watchsync.ui.theme.Ws
@@ -129,18 +131,10 @@ private fun RingScreen(
     }
 }
 
-/** Two amber rings breathing out of the watch, half a cycle apart. */
+/** The glowing halo around the watch while its alarm rings. */
 @Composable
 private fun Rings() {
-    val t = rememberInfiniteTransition(label = "rings")
-    val a by t.animateFloat(0f, 1f, infiniteRepeatable(tween(2600, easing = LinearOutSlowInEasing), RepeatMode.Restart), label = "a")
-    Canvas(Modifier.fillMaxSize()) {
-        listOf(a, (a + 0.5f) % 1f).forEach { p ->
-            drawCircle(
-                color = Ws.Amber.copy(alpha = 0.55f * (1f - p)),
-                radius = size.minDimension / 2f * (0.62f + 0.6f * p),
-                style = Stroke(width = 2.dp.toPx()),
-            )
-        }
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        GlowHalo(haloColors(Ws.Amber), Modifier.size(222.dp), thickness = 4.dp, glow = 16.dp)
     }
 }

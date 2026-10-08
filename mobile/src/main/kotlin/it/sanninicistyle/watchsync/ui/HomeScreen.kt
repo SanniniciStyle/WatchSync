@@ -165,7 +165,6 @@ private fun WatchCard(watch: Peer?, watchAlarm: NextAlarm, ready: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Box(Modifier.size(92.dp), contentAlignment = Alignment.Center) {
-            if (watch?.connected == true) Pulse(color = if (ready) Ws.Mint else Ws.Amber)
             Box(
                 Modifier.size(92.dp).clip(CircleShape).background(Color(0xFF1E2632)).border(3.dp, Color(0xFF2C3644), CircleShape),
                 contentAlignment = Alignment.Center,
@@ -181,6 +180,7 @@ private fun WatchCard(watch: Peer?, watchAlarm: NextAlarm, ready: Boolean) {
                     }
                 }
             }
+            if (watch?.connected == true) Pulse(color = if (ready) Ws.Mint else Ws.Amber)
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             AnimatedContent(targetState = watch?.name, transitionSpec = { slideUp() }, label = "watchName") { name ->
@@ -367,11 +367,10 @@ fun PressableSurface(
 
 @Composable
 internal fun Pulse(color: Color, diameter: androidx.compose.ui.unit.Dp = 92.dp) {
-    val t = rememberInfiniteTransition(label = "pulse")
-    val p by t.animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = FastOutSlowInEasing), RepeatMode.Restart), label = "p")
-    Canvas(Modifier.size(diameter)) {
-        drawCircle(color.copy(alpha = 0.5f * (1f - p)), radius = size.minDimension / 2f * (0.45f + 0.75f * p))
-    }
+    GlowHalo(
+        haloColors(color), Modifier.size(diameter),
+        thickness = (diameter / 28).coerceIn(1.5.dp, 4.dp), glow = (diameter / 8).coerceIn(3.dp, 12.dp),
+    )
 }
 
 internal fun slideUp() =
