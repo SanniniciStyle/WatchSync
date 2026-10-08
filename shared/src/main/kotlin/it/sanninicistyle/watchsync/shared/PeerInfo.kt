@@ -1,6 +1,11 @@
 package it.sanninicistyle.watchsync.shared
 
 import android.content.Context
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.delay
+import com.google.android.gms.wearable.Node
+import android.os.SystemClock
 import androidx.core.content.edit
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.CapabilityInfo
@@ -54,27 +59,61 @@ object PeerInfo {
         }
     }
 
+    private val lastPong = MutableStateFlow(0L)
+
+    /** The other device answered a ping (see [peer]). */
+    fun onPong() {
+        lastPong.value = SystemClock.elapsedRealtime()
+    }
+
     /**
      * The other device running WatchSync, updated as it connects and disconnects. The name is the
      * one the device itself reports (e.g. "Pixel Watch 5", or the phone's Bluetooth name).
+     *
+     * A device in Bluetooth range is connected. One seen only through Google's cloud may well be
+     * switched off (Wear OS keeps listing it), so it is pinged every few seconds while this flow is
+     * collected, and counts as connected only while it answers.
      */
     fun peer(context: Context): Flow<Peer?> = callbackFlow {
         val client = Wearable.getCapabilityClient(context)
-        fun emit(info: CapabilityInfo) {
-            val node = info.nodes.firstOrNull { it.isNearby } ?: info.nodes.firstOrNull()
-            trySend(node?.let { Peer(it.displayName, connected = true) } ?: lastKnown(context))
+        val messages = Wearable.getMessageClient(context)
+        val start = SystemClock.elapsedRealtime()
+        var node: Node? = null
+
+        fun publish() {
+            val n = node
+            if (n == null) {
+                trySend(lastKnown(context))
+                return
+            }
+            val now = SystemClock.elapsedRealtime()
+            // Before the first answer can arrive, trust the cloud link rather than flash "offline"
+            val answered = now - lastPong.value < PONG_FRESH_MS || (lastPong.value < start && now - start < FIRST_PING_GRACE_MS)
+            trySend(Peer(n.displayName, connected = n.isNearby || answered))
         }
-        val listener = CapabilityClient.OnCapabilityChangedListener { info ->
-            info.nodes.firstOrNull()?.let { remember(context, it.displayName) }
-            emit(info)
+
+        fun update(info: CapabilityInfo) {
+            node = info.nodes.firstOrNull { it.isNearby } ?: info.nodes.firstOrNull()
+            node?.let { remember(context, it.displayName) }
+            publish()
         }
+
+        val listener = CapabilityClient.OnCapabilityChangedListener(::update)
         client.addListener(listener, SyncPaths.CAPABILITY)
-        runCatching {
-            client.getCapability(SyncPaths.CAPABILITY, CapabilityClient.FILTER_REACHABLE).await()
-        }.onSuccess { info ->
-            info.nodes.firstOrNull()?.let { remember(context, it.displayName) }
-            emit(info)
-        }.onFailure { trySend(lastKnown(context)) }
+        runCatching { client.getCapability(SyncPaths.CAPABILITY, CapabilityClient.FILTER_REACHABLE).await() }
+            .onSuccess(::update)
+            .onFailure { trySend(lastKnown(context)) }
+
+        launch { lastPong.collect { publish() } }
+        launch {
+            while (isActive) {
+                node?.takeUnless { it.isNearby }?.let { n ->
+                    runCatching { messages.sendMessage(n.id, SyncPaths.PING, ByteArray(0)).await() }
+                }
+                delay(PING_EVERY_MS)
+                publish()
+            }
+        }
         awaitClose { client.removeListener(listener) }
     }
 
@@ -91,4 +130,7 @@ object PeerInfo {
     private const val KEY_APP = "next_alarm_app"
     private const val KEY_NAME = "peer_name"
     private const val KEY_STATUS = "watch_status"
+    private const val PING_EVERY_MS = 8_000L
+    private const val PONG_FRESH_MS = 20_000L
+    private const val FIRST_PING_GRACE_MS = 4_000L
 }

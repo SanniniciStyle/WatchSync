@@ -44,4 +44,8 @@ object SyncPaths {
 
     /** Capability both apps declare in res/values/wear.xml, used to find the peer node. */
     const val CAPABILITY = "watchsync"
+
+    /** Liveness check, answered with [PONG] straight to the sender. */
+    const val PING = "/watchsync/ping"
+    const val PONG = "/watchsync/pong"
 }

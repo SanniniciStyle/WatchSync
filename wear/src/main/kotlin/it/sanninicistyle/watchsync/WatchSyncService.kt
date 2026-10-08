@@ -4,6 +4,7 @@ import it.sanninicistyle.watchsync.shared.DiagLog
 import android.util.Log
 import com.google.android.gms.wearable.CapabilityInfo
 import com.google.android.gms.wearable.MessageEvent
+import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 import it.sanninicistyle.watchsync.shared.AlarmCommand
 import it.sanninicistyle.watchsync.shared.AlarmEvent
@@ -22,6 +23,8 @@ class WatchSyncService : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
         DiagLog.d(TAG, "from phone: ${event.path} (${event.data.size} bytes)")
         when (event.path) {
+            SyncPaths.PING -> Wearable.getMessageClient(this).sendMessage(event.sourceNodeId, SyncPaths.PONG, ByteArray(0))
+            SyncPaths.PONG -> PeerInfo.onPong()
             SyncPaths.PHONE_STATE -> runBlocking {
                 val state = runCatching { ModeState.decode(event.data) }.getOrNull()
                 if (state == null) DiagLog.w(TAG, "bad state payload")
