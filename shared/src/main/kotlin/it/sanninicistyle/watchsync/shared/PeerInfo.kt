@@ -70,15 +70,16 @@ object PeerInfo {
      * The other device running WatchSync, updated as it connects and disconnects. The name is the
      * one the device itself reports (e.g. "Pixel Watch 5", or the phone's Bluetooth name).
      *
-     * A device in Bluetooth range is connected. One seen only through Google's cloud may well be
-     * switched off (Wear OS keeps listing it), so it is pinged every few seconds while this flow is
-     * collected, and counts as connected only while it answers.
+     * Wear OS keeps listing a device as reachable (even "nearby") for a long while after it is
+     * switched off, so the device is pinged every few seconds while this flow is collected and
+     * counts as connected only while it answers.
      */
     fun peer(context: Context): Flow<Peer?> = callbackFlow {
         val client = Wearable.getCapabilityClient(context)
         val messages = Wearable.getMessageClient(context)
         val start = SystemClock.elapsedRealtime()
         var node: Node? = null
+        var shown: Peer? = null
 
         fun publish() {
             val n = node
@@ -89,7 +90,10 @@ object PeerInfo {
             val now = SystemClock.elapsedRealtime()
             // Before the first answer can arrive, trust the cloud link rather than flash "offline"
             val answered = now - lastPong.value < PONG_FRESH_MS || (lastPong.value < start && now - start < FIRST_PING_GRACE_MS)
-            trySend(Peer(n.displayName, connected = n.isNearby || answered))
+            val peer = Peer(n.displayName, connected = answered)
+            if (peer != shown) DiagLog.d("PeerInfo", "showing $peer")
+            shown = peer
+            trySend(peer)
         }
 
         fun update(info: CapabilityInfo) {
@@ -105,9 +109,14 @@ object PeerInfo {
             .onFailure { trySend(lastKnown(context)) }
 
         launch { lastPong.collect { publish() } }
+        // The grace period ends: show the real state without waiting for the next ping
+        launch {
+            delay(FIRST_PING_GRACE_MS + 100)
+            publish()
+        }
         launch {
             while (isActive) {
-                node?.takeUnless { it.isNearby }?.let { n ->
+                node?.let { n ->
                     runCatching { messages.sendMessage(n.id, SyncPaths.PING, ByteArray(0)).await() }
                 }
                 delay(PING_EVERY_MS)
