@@ -2,6 +2,8 @@ package it.sanninicistyle.watchsync.ui
 
 import android.app.LocaleManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.LocaleList
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -152,16 +154,40 @@ fun SettingsScreen(setupItems: List<SetupItem>, version: String, onRelearnRiposo
             }
         }
         SectionTitle(stringResource(R.string.about))
-        PressableSurface(onClick = onLicenses, color = Ws.Surface, shape = RoundedCornerShape(28.dp), modifier = Modifier.fillMaxWidth()) {
-            Text(
-                stringResource(R.string.licenses), style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 18.dp),
-            )
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Ws.Surface).padding(vertical = 6.dp)) {
+            AboutRow(WsIcons.GitHub, stringResource(R.string.source_code), PROJECT_URL.removePrefix("https://")) { openUrl(context, PROJECT_URL) }
+            AboutRow(WsIcons.Info, stringResource(R.string.privacy_policy), null) { openUrl(context, "$PROJECT_URL/blob/main/PRIVACY.md") }
+            AboutRow(WsIcons.Check, stringResource(R.string.licenses), null, onClick = onLicenses)
         }
         Text(
             stringResource(R.string.version, version), style = MaterialTheme.typography.bodyMedium, color = Ws.TextFaint,
             modifier = Modifier.padding(start = 4.dp),
         )
+    }
+}
+
+/** The project's home: source code, issues, releases. */
+const val PROJECT_URL = "https://github.com/SanniniciStyle/WatchSync"
+
+private fun openUrl(context: Context, url: String) {
+    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+}
+
+@Composable
+private fun AboutRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, subtitle: String?, onClick: () -> Unit) {
+    PressableSurface(onClick = onClick, color = Ws.Surface, shape = RoundedCornerShape(20.dp)) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Icon(icon, null, tint = Ws.TextMuted, modifier = Modifier.size(22.dp))
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.labelLarge)
+                subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Ws.TextFaint) }
+            }
+            Icon(WsIcons.ArrowForward, null, tint = Ws.TextFaint, modifier = Modifier.size(18.dp))
+        }
     }
 }
 
