@@ -23,7 +23,6 @@
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="setup_needed">Finish setup</string>
-    <string name="setup_missing">%1$d steps left</string>
 
     <!-- Setup -->
     <string name="setup_title">Setup</string>
@@ -103,4 +102,8 @@
     <string name="privacy_policy">Privacy policy</string>
     <string name="pair_error_outdated">WatchSync on the watch is older than on the phone. Update it from the Play Store on the watch, then try again.</string>
     <string name="pair_error_not_ready">The watch answered, but it\'s still missing: %1$s. Try again.</string>
+    <plurals name="setup_missing">
+        <item quantity="one">%1$d step left</item>
+        <item quantity="other">%1$d steps left</item>
+    </plurals>
 </resources>

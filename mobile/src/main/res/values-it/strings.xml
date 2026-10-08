@@ -21,7 +21,6 @@
     <string name="today">Oggi</string>
     <string name="tomorrow">Domani</string>
     <string name="setup_needed">Completa la configurazione</string>
-    <string name="setup_missing">Mancano %1$d passaggi</string>
 
     <string name="setup_title">Configurazione</string>
     <string name="perm_notifications">Notifiche</string>
@@ -97,4 +96,8 @@
     <string name="privacy_policy">Informativa sulla privacy</string>
     <string name="pair_error_outdated">WatchSync sull\'orologio è più vecchia di quella del telefono. Aggiornala dal Play Store dell\'orologio, poi riprova.</string>
     <string name="pair_error_not_ready">L\'orologio ha risposto, ma manca ancora: %1$s. Riprova.</string>
+    <plurals name="setup_missing">
+        <item quantity="one">Manca %1$d passaggio</item>
+        <item quantity="other">Mancano %1$d passaggi</item>
+    </plurals>
 </resources>

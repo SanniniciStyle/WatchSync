@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -145,7 +146,7 @@ private fun SetupBanner(permissions: Permissions, onOpenSetup: () -> Unit) {
         ) {
             Column {
                 Text(stringResource(R.string.setup_needed), style = MaterialTheme.typography.titleMedium, color = Ws.OnAmber)
-                Text(stringResource(R.string.setup_missing, missing), style = MaterialTheme.typography.bodyMedium, color = Ws.OnAmber)
+                Text(pluralStringResource(R.plurals.setup_missing, missing, missing), style = MaterialTheme.typography.bodyMedium, color = Ws.OnAmber)
             }
             Icon(WsIcons.ArrowForward, contentDescription = null, tint = Ws.OnAmber)
         }

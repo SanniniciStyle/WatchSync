@@ -1,6 +1,7 @@
 package it.sanninicistyle.watchsync.adb
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -16,9 +17,14 @@ object BondedWatch {
     fun canRead(context: Context) = context.checkSelfPermission(PERMISSION) == PackageManager.PERMISSION_GRANTED
 
     /** The address of the paired watch named [name] (the Wear OS node's name), if exactly one fits. */
+    @SuppressLint("MissingPermission") // checked just above; a revoke in between is caught
     fun address(context: Context, name: String?): String? {
         if (!canRead(context)) return null
-        val bonded = context.getSystemService(BluetoothManager::class.java).adapter?.bondedDevices.orEmpty()
+        val bonded = try {
+            context.getSystemService(BluetoothManager::class.java).adapter?.bondedDevices.orEmpty()
+        } catch (e: SecurityException) {
+            return null
+        }
         val wearables = bonded.filter { it.bluetoothClass?.majorDeviceClass == BluetoothClass.Device.Major.WEARABLE }
         val byName = name?.let { n -> bonded.filter { it.name?.startsWith(n) == true || it.alias?.startsWith(n) == true } }.orEmpty()
         return (byName.singleOrNull() ?: wearables.singleOrNull())?.address

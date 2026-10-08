@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="phone_none">Kein Smartphone</string>
+    <string name="no_alarm">Kein Wecker</string>
+    <string name="today">Heute</string>
+    <string name="tomorrow">Morgen</string>
+    <string name="mode_dnd_short">DND</string>
+    <string name="mode_riposo">Ruhe</string>
+    <string name="mode_on">An</string>
+    <string name="mode_off">Aus</string>
+    <string name="channel_alarms">Wecker des Smartphones</string>
+    <string name="channel_monitor">Weckerüberwachung</string>
+    <string name="monitor_running">Wecker mit dem Smartphone synchronisiert</string>
+    <string name="alarm_from_phone">Vom Smartphone</string>
+    <string name="alarm_stop">Stopp</string>
+    <string name="alarm_snooze">Schlummern</string>
+    <string name="needs_setup">Einrichtung nötig</string>
+    <string name="alarm_day_phone">%1$s · Smartphone</string>
+</resources>

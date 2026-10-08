@@ -15,7 +15,9 @@ android {
 
     defaultConfig {
         applicationId = "it.sanninicistyle.watchsync"
-        minSdk = 33
+        // Android 15: modes (AutomaticZenRule state, device effects) and global DND for a watch's
+        // companion app are what the 1:1 sync is built on
+        minSdk = 35
         targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="phone_none">Sin teléfono</string>
+    <string name="no_alarm">Sin alarmas</string>
+    <string name="today">Hoy</string>
+    <string name="tomorrow">Mañana</string>
+    <string name="mode_dnd_short">DND</string>
+    <string name="mode_riposo">Descanso</string>
+    <string name="mode_on">Activado</string>
+    <string name="mode_off">Desactivado</string>
+    <string name="channel_alarms">Alarmas del teléfono</string>
+    <string name="channel_monitor">Supervisión de alarmas</string>
+    <string name="monitor_running">Alarma sincronizada con el teléfono</string>
+    <string name="alarm_from_phone">Del teléfono</string>
+    <string name="alarm_stop">Detener</string>
+    <string name="alarm_snooze">Posponer</string>
+    <string name="needs_setup">Falta configurar</string>
+    <string name="alarm_day_phone">%1$s · teléfono</string>
+</resources>

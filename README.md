@@ -16,7 +16,7 @@ No account, no cloud of its own, no ads, no tracking. Free software under the GP
 
 ## Requirements
 
-- An Android phone running Android 13 or later.
+- An Android phone running Android 15 or later.
 - A Wear OS watch running Wear OS 4 or later, paired with the phone. Developed and tested on a
   Pixel Watch 5 with a HONOR Magic V6 (Android 17).
 - WatchSync installed on both.
