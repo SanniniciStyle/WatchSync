@@ -18,7 +18,8 @@ android {
         minSdk = 33
         // Wear OS apps on Google Play must target API 35+ (from 31 Aug 2026)
         targetSdk = 35
-        versionCode = 1
+        // Same package as the phone app on Google Play: version codes must differ (wear = 100000 + phone)
+        versionCode = 100001
         versionName = "1.0.0"
     }
 

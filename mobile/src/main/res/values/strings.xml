@@ -36,7 +36,6 @@
     <string name="perm_fullscreen">Full-screen alarms</string>
     <string name="perm_fullscreen_desc">To show the alarm on the locked screen</string>
     <string name="grant">Allow</string>
-    <string name="granted">Done</string>
 
     <!-- Watch pairing -->
     <string name="pair_title">Connect the watch</string>

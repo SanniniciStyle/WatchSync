@@ -33,7 +33,6 @@
     <string name="perm_fullscreen">Sveglie a schermo intero</string>
     <string name="perm_fullscreen_desc">Per mostrare la sveglia anche a schermo bloccato</string>
     <string name="grant">Consenti</string>
-    <string name="granted">Fatto</string>
 
     <string name="pair_title">Collega l\'orologio</string>
     <string name="pair_connect">Collega</string>
