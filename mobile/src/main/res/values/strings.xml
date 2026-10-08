@@ -106,4 +106,5 @@
         <item quantity="one">%1$d step left</item>
         <item quantity="other">%1$d steps left</item>
     </plurals>
+    <string name="channel_alarms_quiet">Watch alarm on screen</string>
 </resources>

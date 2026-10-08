@@ -95,4 +95,5 @@
         <item quantity="one">Falta %1$d paso</item>
         <item quantity="other">Faltan %1$d pasos</item>
     </plurals>
+    <string name="channel_alarms_quiet">Alarma del reloj en pantalla</string>
 </resources>

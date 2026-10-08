@@ -53,6 +53,23 @@ import it.sanninicistyle.watchsync.ui.theme.Ws
 
 /** Full-screen alarm shown while an alarm of the watch rings on the phone. */
 class AlarmRingActivity : ComponentActivity() {
+    override fun onResume() {
+        super.onResume()
+        visible = true
+    }
+
+    override fun onPause() {
+        visible = false
+        super.onPause()
+    }
+
+    companion object {
+        /** The alarm screen is in front of the user (the ringing service then keeps quiet). */
+        @Volatile
+        var visible = false
+            private set
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

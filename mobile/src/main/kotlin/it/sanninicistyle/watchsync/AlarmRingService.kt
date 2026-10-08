@@ -57,9 +57,11 @@ class AlarmRingService : Service() {
     private fun ring(event: AlarmEvent) {
         current = event
         MirroredAlarm.set(event)
+        // Quiet at first: the alarm screen below shows everything, a heads-up on top would only
+        // cover it
         startForeground(
             NOTIFICATION_ID,
-            buildNotification(event),
+            buildNotification(event, loud = false),
             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
         )
         startSound()
@@ -69,6 +71,13 @@ class AlarmRingService : Service() {
         // activities from the background); the full-screen intent is the fallback
         runCatching {
             startActivity(Intent(this, AlarmRingActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+        // Screen didn't come up (start from the background refused): full-screen notification instead
+        scope.launch {
+            delay(SCREEN_CHECK_MS)
+            if (current == event && !AlarmRingActivity.visible) {
+                getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, buildNotification(event, loud = true))
+            }
         }
         scope.launch {
             delay(MAX_RING_MS)
@@ -122,11 +131,17 @@ class AlarmRingService : Service() {
         )
     }
 
-    private fun buildNotification(event: AlarmEvent): Notification {
+    private fun buildNotification(event: AlarmEvent, loud: Boolean): Notification {
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(
             NotificationChannel(CHANNEL_ID, getString(R.string.channel_alarms), NotificationManager.IMPORTANCE_HIGH).apply {
                 setSound(null, null) // the service plays the sound itself
+                enableVibration(false)
+            }
+        )
+        nm.createNotificationChannel(
+            NotificationChannel(CHANNEL_QUIET, getString(R.string.channel_alarms_quiet), NotificationManager.IMPORTANCE_LOW).apply {
+                setSound(null, null)
                 enableVibration(false)
             }
         )
@@ -135,14 +150,15 @@ class AlarmRingService : Service() {
             Intent(this, AlarmRingActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        val builder = Notification.Builder(this, CHANNEL_ID)
+        val builder = Notification.Builder(this, if (loud) CHANNEL_ID else CHANNEL_QUIET)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(event.title.ifBlank { getString(R.string.alarm_from_watch) })
             .setContentText(event.text.ifBlank { getString(R.string.alarm_from_watch) })
             .setCategory(Notification.CATEGORY_ALARM)
             .setOngoing(true)
-            .setFullScreenIntent(fullScreen, true)
             .setContentIntent(fullScreen)
+        if (loud) builder.setFullScreenIntent(fullScreen, true)
+        builder
             .addAction(Notification.Action.Builder(null, getString(R.string.alarm_stop), servicePending(ACTION_STOP)).build())
         if (event.canSnooze) {
             builder.addAction(Notification.Action.Builder(null, getString(R.string.alarm_snooze), servicePending(ACTION_SNOOZE)).build())
@@ -164,6 +180,8 @@ class AlarmRingService : Service() {
     companion object {
         private const val TAG = "AlarmRingService"
         private const val CHANNEL_ID = "mirrored_alarm"
+        private const val CHANNEL_QUIET = "mirrored_alarm_on_screen"
+        private const val SCREEN_CHECK_MS = 1_500L
         private const val NOTIFICATION_ID = 1001
         private const val MAX_RING_MS = 10 * 60 * 1000L
         private const val ACTION_RING = "ring"
