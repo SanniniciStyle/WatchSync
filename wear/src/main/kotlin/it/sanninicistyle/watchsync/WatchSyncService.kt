@@ -2,6 +2,7 @@ package it.sanninicistyle.watchsync
 
 import it.sanninicistyle.watchsync.shared.DiagLog
 import android.util.Log
+import com.google.android.gms.wearable.CapabilityInfo
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 import it.sanninicistyle.watchsync.shared.AlarmCommand
@@ -10,6 +11,7 @@ import it.sanninicistyle.watchsync.shared.AlarmPaths
 import it.sanninicistyle.watchsync.shared.InfoPaths
 import it.sanninicistyle.watchsync.shared.InfoSync
 import it.sanninicistyle.watchsync.shared.ModeState
+import it.sanninicistyle.watchsync.shared.StatusPaths
 import it.sanninicistyle.watchsync.shared.NextAlarm
 import it.sanninicistyle.watchsync.shared.PeerInfo
 import it.sanninicistyle.watchsync.shared.SyncPaths
@@ -41,8 +43,18 @@ class WatchSyncService : WearableListenerService() {
                 PeerInfo.setNextAlarm(this, it)
             }
             InfoPaths.REQUEST -> InfoSync.sendNextAlarm(this, InfoPaths.WATCH_NEXT_ALARM)
+            StatusPaths.REQUEST -> WatchSetup.report(this)
             else -> super.onMessageReceived(event)
         }
+    }
+
+    /** The phone came back in reach: realign modes and info right away. */
+    override fun onCapabilityChanged(info: CapabilityInfo) {
+        if (info.nodes.isEmpty()) return
+        DiagLog.d(TAG, "phone reachable again: resync")
+        runBlocking { WatchSyncComponents.modeSync(this@WatchSyncService).pushCurrent() }
+        InfoSync.sendNextAlarm(this, InfoPaths.WATCH_NEXT_ALARM)
+        WatchSetup.report(this)
     }
 
     private companion object {

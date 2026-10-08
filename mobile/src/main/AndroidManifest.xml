@@ -68,6 +68,14 @@
                     android:pathPrefix="/watchsync/"
                     android:scheme="wear" />
             </intent-filter>
+            <!-- The peer became reachable again: resync -->
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
+                <data
+                    android:host="*"
+                    android:path="/watchsync"
+                    android:scheme="wear" />
+            </intent-filter>
         </service>
 
         <!-- Rings on the phone (sound, vibration, alarm screen) while an alarm of the watch rings -->

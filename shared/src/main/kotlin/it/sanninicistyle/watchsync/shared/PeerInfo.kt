@@ -23,9 +23,21 @@ object PeerInfo {
     /** Next alarm of the other device, as it last reported it. */
     val nextAlarm: StateFlow<NextAlarm> = _nextAlarm.asStateFlow()
 
+    private val _watchStatus = MutableStateFlow<WatchStatus?>(null)
+
+    /** Setup state of the watch app as it last reported it (phone side only), null if unknown. */
+    val watchStatus: StateFlow<WatchStatus?> = _watchStatus.asStateFlow()
+
     fun load(context: Context) {
         val p = prefs(context)
         _nextAlarm.value = NextAlarm(p.getLong(KEY_AT, 0L), p.getString(KEY_APP, "").orEmpty())
+        _watchStatus.value = p.getString(KEY_STATUS, null)
+            ?.let { runCatching { WatchStatus.decode(android.util.Base64.decode(it, 0)) }.getOrNull() }
+    }
+
+    fun setWatchStatus(context: Context, status: WatchStatus) {
+        _watchStatus.value = status
+        prefs(context).edit { putString(KEY_STATUS, android.util.Base64.encodeToString(status.encode(), 0)) }
     }
 
     fun setNextAlarm(context: Context, alarm: NextAlarm) {
@@ -72,4 +84,5 @@ object PeerInfo {
     private const val KEY_AT = "next_alarm_at"
     private const val KEY_APP = "next_alarm_app"
     private const val KEY_NAME = "peer_name"
+    private const val KEY_STATUS = "watch_status"
 }

@@ -99,7 +99,7 @@ fun HomeScreen(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(22.dp),
     ) {
-        TopBar(mode = modes.mode, onOpenSettings = onOpenSettings)
+        TopBar(mode = modes.mode, connected = watch?.connected == true, onOpenSettings = onOpenSettings)
         if (!permissions.allGranted) SetupBanner(permissions, onOpenSetup)
         WatchCard(watch = watch, watchAlarm = watchAlarm)
         ModesSection(modes = modes, onToggle = onToggle)
@@ -109,21 +109,14 @@ fun HomeScreen(
 }
 
 @Composable
-private fun TopBar(mode: Mode, onOpenSettings: () -> Unit) {
-    val dot by animateColorAsState(
-        when (mode) { Mode.RIPOSO -> Ws.Moon; Mode.DND -> Ws.Amber; Mode.NONE -> Ws.Mint },
-        spring(stiffness = Spring.StiffnessLow), label = "dot",
-    )
+private fun TopBar(mode: Mode, connected: Boolean, onOpenSettings: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().padding(top = 8.dp, start = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Box(
-                Modifier.size(30.dp).border(2.dp, Ws.Text, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) { Box(Modifier.size(12.dp).clip(CircleShape).background(dot)) }
+            SyncLogo(connected = connected, modifier = Modifier.size(40.dp))
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
         }
         IconButton(
