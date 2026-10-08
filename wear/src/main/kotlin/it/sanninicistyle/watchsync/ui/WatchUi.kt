@@ -75,7 +75,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.Text
 import it.sanninicistyle.watchsync.R
+import it.sanninicistyle.watchsync.WatchModeListenerService
 import it.sanninicistyle.watchsync.WatchModes
+import it.sanninicistyle.watchsync.WatchSyncComponents
+import it.sanninicistyle.watchsync.shared.ListenerBinding
 import it.sanninicistyle.watchsync.WatchSetup
 import it.sanninicistyle.watchsync.shared.NextAlarm
 import it.sanninicistyle.watchsync.shared.Peer
@@ -174,6 +177,7 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun refresh() {
+        ListenerBinding.ensure(getApplication(), WatchModeListenerService::class.java)
         viewModelScope.launch(Dispatchers.Default) {
             val bedtime = modes.readBedtime()
             _mode.value = when { bedtime -> Mode.RIPOSO; modes.readAnyDnd() -> Mode.DND; else -> Mode.NONE }
@@ -188,6 +192,8 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
         _mode.value = next
         viewModelScope.launch(Dispatchers.Default) {
             modes.apply(dnd = next == Mode.DND, bedtime = next == Mode.RIPOSO)
+            // Tell the phone now; the listener would too, but only once it is bound
+            WatchSyncComponents.modeSync(getApplication()).onLocalChanged()
             refresh()
         }
     }

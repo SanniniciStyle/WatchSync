@@ -33,6 +33,7 @@ object WatchSetup {
             appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
             btAddress = prefs(context).getString(KEY_ADDRESS, "").orEmpty(),
             exactAlarms = context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms(),
+            protocol = WatchStatus.PROTOCOL,
         )
     }
 

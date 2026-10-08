@@ -24,9 +24,9 @@ import java.io.IOException
 class WatchProvisioner(private val context: Context) {
     enum class Step { PAIR, CONNECT, GRANT, VERIFY }
 
-    enum class Failure { WRONG_CODE, NO_CONNECTION, APP_MISSING, GRANT_FAILED, NO_REPORT }
+    enum class Failure { WRONG_CODE, NO_CONNECTION, APP_MISSING, GRANT_FAILED, NO_REPORT, WATCH_OUTDATED, NOT_READY }
 
-    class ProvisionException(val failure: Failure, cause: Throwable? = null) : Exception(failure.name, cause)
+    class ProvisionException(val failure: Failure, cause: Throwable? = null, val detail: String = "") : Exception(failure.name, cause)
 
     private val pkg = context.packageName
 
@@ -68,12 +68,18 @@ class WatchProvisioner(private val context: Context) {
             enter(Step.VERIFY)
             WatchIdentity.address(context)?.let { PeerMessenger(context).send(StatusPaths.ADDRESS, it.toByteArray()) }
             PeerInfo.clearWatchStatus(context)
+            // Wait for a ready report; settle for the last one heard if it never gets there
             val status = withTimeoutOrNull(20_000) {
                 PeerMessenger(context).send(StatusPaths.REQUEST)
                 PeerInfo.watchStatus.filterNotNull().filter { it.ready }.first()
-            }
+            } ?: PeerInfo.watchStatus.value
             DiagLog.d(TAG, "watch reported $status")
-            status ?: throw ProvisionException(Failure.NO_REPORT)
+            when {
+                status == null -> throw ProvisionException(Failure.NO_REPORT)
+                status.ready -> status
+                status.outdated -> throw ProvisionException(Failure.WATCH_OUTDATED)
+                else -> throw ProvisionException(Failure.NOT_READY, detail = status.missing.joinToString(", "))
+            }
         } catch (e: ProvisionException) {
             throw e
         } catch (e: CancellationException) {

@@ -1,5 +1,6 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.ListenerBinding
 import it.sanninicistyle.watchsync.shared.DiagLog
 import android.database.ContentObserver
 import android.os.Handler
@@ -32,6 +33,7 @@ class WatchModeListenerService : NotificationListenerService() {
     }
 
     override fun onListenerConnected() {
+        ListenerBinding.connected = true
         DiagLog.d(TAG, "connected")
         contentResolver.registerContentObserver(
             Settings.Global.getUriFor(WatchModes.BEDTIME_SETTING), false, bedtimeObserver
@@ -43,6 +45,8 @@ class WatchModeListenerService : NotificationListenerService() {
 
     override fun onListenerDisconnected() {
         contentResolver.unregisterContentObserver(bedtimeObserver)
+        ListenerBinding.connected = false
+        ListenerBinding.ensure(this, javaClass)
     }
 
     override fun onInterruptionFilterChanged(interruptionFilter: Int) = scheduleReport()

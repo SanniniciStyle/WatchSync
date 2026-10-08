@@ -1,6 +1,7 @@
 package it.sanninicistyle.watchsync
 
 import it.sanninicistyle.watchsync.shared.DiagLog
+import it.sanninicistyle.watchsync.shared.ListenerBinding
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -26,8 +27,15 @@ class PhoneModeListenerService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         DiagLog.d(TAG, "connected")
+        ListenerBinding.connected = true
         scope.launch { PhoneSyncComponents.modes(this@PhoneModeListenerService).riposo.cleanUp() }
         scheduleReport()
+    }
+
+    override fun onListenerDisconnected() {
+        DiagLog.d(TAG, "disconnected")
+        ListenerBinding.connected = false
+        ListenerBinding.ensure(this, javaClass)
     }
 
     // Turning Riposo on or off always changes the interruption filter too

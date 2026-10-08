@@ -96,4 +96,6 @@
     <string name="licenses_lgpl_note">spake2-java è usato con licenza LGPL 3.0, che si basa sulla GPL 3.0 qui sotto. Il suo codice sorgente è su github.com/MuntashirAkon/spake2-java.</string>
     <string name="source_code">Codice sorgente su GitHub</string>
     <string name="privacy_policy">Informativa sulla privacy</string>
+    <string name="pair_error_outdated">WatchSync sull\'orologio è più vecchia di quella del telefono. Aggiornala dal Play Store dell\'orologio, poi riprova.</string>
+    <string name="pair_error_not_ready">L\'orologio ha risposto, ma manca ancora: %1$s. Riprova.</string>
 </resources>

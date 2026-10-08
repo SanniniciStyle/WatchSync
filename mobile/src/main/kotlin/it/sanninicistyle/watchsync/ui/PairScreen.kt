@@ -80,7 +80,7 @@ sealed interface PairState {
     data object Input : PairState
     data class Working(val step: Step) : PairState
     data object Done : PairState
-    data class Failed(val failure: Failure) : PairState
+    data class Failed(val failure: Failure, val detail: String = "") : PairState
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -107,7 +107,7 @@ class PairViewModel(app: Application) : AndroidViewModel(app) {
                 WatchProvisioner(getApplication()).run(endpoint, code) { _state.value = PairState.Working(it) }
                 PairState.Done
             } catch (e: WatchProvisioner.ProvisionException) {
-                PairState.Failed(e.failure)
+                PairState.Failed(e.failure, e.detail)
             } catch (e: Exception) {
                 DiagLog.w("PairViewModel", "setup failed", e)
                 PairState.Failed(Failure.NO_CONNECTION)
@@ -279,7 +279,7 @@ private fun ProgressPane(state: PairState, onRetry: () -> Unit, onDone: () -> Un
                     WideButton(stringResource(R.string.done), Ws.Amber, Ws.OnAmber, onDone)
                 }
                 is PairState.Failed -> Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text(stringResource(failureText(s.failure)), style = MaterialTheme.typography.bodyLarge, color = Ws.Text)
+                    Text(stringResource(failureText(s.failure), s.detail), style = MaterialTheme.typography.bodyLarge, color = Ws.Text)
                     WideButton(stringResource(R.string.retry), Ws.SurfaceHigh, Ws.Text, onRetry)
                 }
                 else -> Box(Modifier.height(1.dp))
@@ -334,7 +334,7 @@ private fun failedStep(failure: Failure) = when (failure) {
     Failure.WRONG_CODE -> Step.PAIR
     Failure.NO_CONNECTION -> Step.CONNECT
     Failure.APP_MISSING, Failure.GRANT_FAILED -> Step.GRANT
-    Failure.NO_REPORT -> Step.VERIFY
+    Failure.NO_REPORT, Failure.WATCH_OUTDATED, Failure.NOT_READY -> Step.VERIFY
 }
 
 private fun stepLabel(step: Step) = when (step) {
@@ -350,4 +350,6 @@ private fun failureText(failure: Failure) = when (failure) {
     Failure.APP_MISSING -> R.string.pair_error_app
     Failure.GRANT_FAILED -> R.string.pair_error_grant
     Failure.NO_REPORT -> R.string.pair_error_report
+    Failure.WATCH_OUTDATED -> R.string.pair_error_outdated
+    Failure.NOT_READY -> R.string.pair_error_not_ready
 }

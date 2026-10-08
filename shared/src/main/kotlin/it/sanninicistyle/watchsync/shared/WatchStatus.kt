@@ -27,13 +27,31 @@ data class WatchStatus(
     @ProtoNumber(8) val btAddress: String = "",
     /** Checking the clock at the exact second an alarm is due. */
     @ProtoNumber(9) val exactAlarms: Boolean = false,
+    /** What this watch app knows how to report (1: before exactAlarms). */
+    @ProtoNumber(10) val protocol: Int = 1,
 ) {
-    val ready: Boolean
-        get() = secureSettings && usageStats && listener && dndAccess && associated && notifications && exactAlarms
+    /** Grants still missing, by name (empty when ready). Older watch apps don't report exactAlarms. */
+    val missing: List<String>
+        get() = buildList {
+            if (!secureSettings) add("secure settings")
+            if (!usageStats) add("usage access")
+            if (!listener) add("notification access")
+            if (!dndAccess) add("Do Not Disturb access")
+            if (!associated) add("companion association")
+            if (!notifications) add("notifications")
+            if (protocol >= 2 && !exactAlarms) add("exact alarms")
+        }
+
+    val ready: Boolean get() = missing.isEmpty()
+
+    /** The watch app is older than this phone app. */
+    val outdated: Boolean get() = protocol < PROTOCOL
 
     fun encode(): ByteArray = ProtoBuf.encodeToByteArray(this)
 
     companion object {
+        const val PROTOCOL = 2
+
         fun decode(bytes: ByteArray): WatchStatus = ProtoBuf.decodeFromByteArray(bytes)
     }
 }

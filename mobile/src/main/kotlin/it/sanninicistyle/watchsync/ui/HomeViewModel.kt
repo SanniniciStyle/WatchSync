@@ -14,6 +14,8 @@ import it.sanninicistyle.watchsync.shared.InfoPaths
 import it.sanninicistyle.watchsync.shared.NextAlarm
 import it.sanninicistyle.watchsync.shared.Peer
 import it.sanninicistyle.watchsync.shared.PeerInfo
+import it.sanninicistyle.watchsync.PhoneModeListenerService
+import it.sanninicistyle.watchsync.shared.ListenerBinding
 import it.sanninicistyle.watchsync.shared.PeerMessenger
 import it.sanninicistyle.watchsync.shared.StatusPaths
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +73,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Re-reads everything from the system (also called when the screen resumes). */
     fun refresh() {
+        ListenerBinding.ensure(ctx, PhoneModeListenerService::class.java)
         viewModelScope.launch(Dispatchers.Default) {
             val riposo = modes.readBedtime()
             val dnd = !riposo && modes.readAnyDnd()
@@ -91,6 +94,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         _modes.value = _modes.value.copy(mode = next) // instant feedback, confirmed by refresh()
         viewModelScope.launch(Dispatchers.Default) {
             modes.apply(dnd = next == Mode.DND, bedtime = next == Mode.RIPOSO)
+            // Tell the watch now; the listener would too, but only once it is bound
+            PhoneSyncComponents.modeSync(ctx).onLocalChanged()
             refresh()
         }
     }
