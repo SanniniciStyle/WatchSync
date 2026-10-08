@@ -100,5 +100,5 @@
         <item quantity="one">Manca %1$d passaggio</item>
         <item quantity="other">Mancano %1$d passaggi</item>
     </plurals>
-    <string name="channel_alarms_quiet">Sveglia dell'orologio sullo schermo</string>
+    <string name="channel_alarms_quiet">Sveglia dell\'orologio sullo schermo</string>
 </resources>

@@ -96,5 +96,5 @@
         <item quantity="many">Encore %1$d étapes</item>
         <item quantity="other">Encore %1$d étapes</item>
     </plurals>
-    <string name="channel_alarms_quiet">Alarme de la montre à l'écran</string>
+    <string name="channel_alarms_quiet">Alarme de la montre à l\'écran</string>
 </resources>
