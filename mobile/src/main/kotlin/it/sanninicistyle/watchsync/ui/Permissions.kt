@@ -11,6 +11,7 @@ import android.net.Uri
 import android.provider.Settings
 import it.sanninicistyle.watchsync.PhoneModeListenerService
 import it.sanninicistyle.watchsync.SystemRiposo
+import it.sanninicistyle.watchsync.shared.ListenerBinding
 import it.sanninicistyle.watchsync.shared.PeerInfo
 
 /** Everything the phone app needs from the user, read live from the system. */
@@ -36,9 +37,10 @@ data class Permissions(
             return Permissions(
                 notifications = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
                     PackageManager.PERMISSION_GRANTED,
+                // Granted is not enough: the system must also have bound it (see ListenerBinding)
                 listener = nm.isNotificationListenerAccessGranted(
                     ComponentName(context, PhoneModeListenerService::class.java)
-                ),
+                ) && ListenerBinding.healthy,
                 dndAccess = nm.isNotificationPolicyAccessGranted,
                 watchAssociated = cdm.myAssociations.isNotEmpty(),
                 fullScreen = nm.canUseFullScreenIntent(),

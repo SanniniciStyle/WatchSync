@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** Which of the two exclusive modes is on. */
@@ -69,6 +70,11 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         }
         // The watch's setup state arrives over the Data Layer: re-read when it changes
         viewModelScope.launch { PeerInfo.watchStatus.collect { refresh() } }
+        // The listener's binding is only known for sure a few seconds after start: look again then
+        viewModelScope.launch {
+            delay(16_000)
+            refresh()
+        }
     }
 
     /** Re-reads everything from the system (also called when the screen resumes). */

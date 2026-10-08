@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Process
 import it.sanninicistyle.watchsync.shared.AppScope
+import it.sanninicistyle.watchsync.shared.ListenerBinding
 import it.sanninicistyle.watchsync.shared.PeerMessenger
 import it.sanninicistyle.watchsync.shared.StatusPaths
 import it.sanninicistyle.watchsync.shared.WatchStatus
@@ -26,7 +27,9 @@ object WatchSetup {
             secureSettings = granted(Manifest.permission.WRITE_SECURE_SETTINGS),
             usageStats = ops.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), context.packageName) ==
                 AppOpsManager.MODE_ALLOWED,
-            listener = nm.isNotificationListenerAccessGranted(ComponentName(context, WatchModeListenerService::class.java)),
+            // Granted is not enough: it must be bound too (setting the watch up again rebinds it)
+            listener = nm.isNotificationListenerAccessGranted(ComponentName(context, WatchModeListenerService::class.java)) &&
+                ListenerBinding.healthy,
             dndAccess = nm.isNotificationPolicyAccessGranted,
             associated = cdm.myAssociations.isNotEmpty(),
             notifications = granted(Manifest.permission.POST_NOTIFICATIONS),

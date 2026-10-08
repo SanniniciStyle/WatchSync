@@ -1,5 +1,6 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.ListenerBinding
 import it.sanninicistyle.watchsync.shared.DiagLog
 import android.util.Log
 import com.google.android.gms.wearable.CapabilityInfo
@@ -25,6 +26,8 @@ import kotlinx.coroutines.runBlocking
 class PhoneSyncService : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
         DiagLog.d(TAG, "from watch: ${event.path} (${event.data.size} bytes)")
+        // Any message from the other device is a chance to check the listener is still bound
+        ListenerBinding.ensure(this, PhoneModeListenerService::class.java)
         when (event.path) {
             SyncPaths.PING -> Wearable.getMessageClient(this).sendMessage(event.sourceNodeId, SyncPaths.PONG, ByteArray(0))
             SyncPaths.PONG -> PeerInfo.onPong()

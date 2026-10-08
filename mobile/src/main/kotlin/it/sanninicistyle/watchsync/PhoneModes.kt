@@ -28,7 +28,11 @@ class PhoneModes(context: Context) : LocalModes {
 
     override suspend fun apply(dnd: Boolean, bedtime: Boolean) {
         if (bedtime) {
-            if (!readBedtime()) riposo.setActive(true)
+            if (!readBedtime()) {
+                // DND and Rest are never on together: a manual DND stays below Rest otherwise
+                if (readAnyDnd()) setDnd(false)
+                riposo.setActive(true)
+            }
             return
         }
         if (riposo.isActive) {
