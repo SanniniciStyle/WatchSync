@@ -1,0 +1,91 @@
+package it.sanninicistyle.watchsync
+
+import android.app.AutomaticZenRule
+import android.app.NotificationManager
+import android.content.ComponentName
+import android.content.Context
+import android.net.Uri
+import android.service.notification.Condition
+import android.service.notification.ZenDeviceEffects
+import android.service.notification.ZenPolicy
+import android.util.Log
+import androidx.core.content.edit
+
+/**
+ * The phone's "Riposo" mode. It belongs to WatchSync, so unlike the Digital Wellbeing one it can
+ * be switched on and off by the app, which is what makes a 1:1 Bedtime sync possible.
+ * Its rules mirror the user's existing Riposo: starred contacts and repeat callers ring, alarms
+ * and media play, everything else is silent and the screen turns grey.
+ */
+class RiposoMode(private val context: Context) {
+    private val nm = context.getSystemService(NotificationManager::class.java)
+    private val prefs = context.getSharedPreferences("riposo", Context.MODE_PRIVATE)
+
+    /** Returns the rule id, creating the rule on first use. Null without DND access. */
+    fun ensure(): String? {
+        if (!nm.isNotificationPolicyAccessGranted) return null
+        prefs.getString(KEY_ID, null)?.let { id ->
+            if (nm.getAutomaticZenRule(id) != null) return id
+        }
+        val id = try {
+            nm.addAutomaticZenRule(buildRule(withGrayscale = true))
+        } catch (e: IllegalArgumentException) {
+            // Some device effects may be reserved to system apps: fall back without them
+            Log.w(TAG, "rule with grayscale rejected, retrying without", e)
+            nm.addAutomaticZenRule(buildRule(withGrayscale = false))
+        }
+        prefs.edit { putString(KEY_ID, id) }
+        Log.d(TAG, "created Riposo rule $id")
+        return id
+    }
+
+    val isActive: Boolean
+        get() {
+            val id = ensure() ?: return false
+            return nm.getAutomaticZenRuleState(id) == Condition.STATE_TRUE
+        }
+
+    fun setActive(active: Boolean) {
+        val id = ensure() ?: return
+        val state = if (active) Condition.STATE_TRUE else Condition.STATE_FALSE
+        nm.setAutomaticZenRuleState(
+            id, Condition(CONDITION_ID, NAME, state, Condition.SOURCE_CONTEXT)
+        )
+        Log.d(TAG, "Riposo -> $active")
+    }
+
+    private fun buildRule(withGrayscale: Boolean): AutomaticZenRule {
+        val policy = ZenPolicy.Builder()
+            .allowAlarms(true)
+            .allowMedia(true)
+            .allowSystem(false)
+            .allowReminders(false)
+            .allowEvents(false)
+            .allowCalls(ZenPolicy.PEOPLE_TYPE_STARRED)
+            .allowRepeatCallers(true)
+            .allowMessages(ZenPolicy.PEOPLE_TYPE_NONE)
+            .allowConversations(ZenPolicy.CONVERSATION_SENDERS_NONE)
+            .hideAllVisualEffects()
+            .build()
+        return AutomaticZenRule.Builder(NAME, CONDITION_ID)
+            .setType(AutomaticZenRule.TYPE_OTHER)
+            .setConfigurationActivity(ComponentName(context, MainActivity::class.java))
+            .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+            .setZenPolicy(policy)
+            .setManualInvocationAllowed(true)
+            .setTriggerDescription(context.getString(R.string.riposo_trigger))
+            .apply {
+                if (withGrayscale) {
+                    setDeviceEffects(ZenDeviceEffects.Builder().setShouldDisplayGrayscale(true).build())
+                }
+            }
+            .build()
+    }
+
+    private companion object {
+        const val TAG = "RiposoMode"
+        const val KEY_ID = "rule_id"
+        const val NAME = "Riposo"
+        val CONDITION_ID: Uri = Uri.parse("condition://it.sanninicistyle.watchsync/riposo")
+    }
+}

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WatchSync</string>
+    <string name="riposo_trigger">Sincronizzata con il Riposo dell\'orologio</string>
+</resources>
