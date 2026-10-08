@@ -135,6 +135,6 @@ private fun RingScreen(
 @Composable
 private fun Rings() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        GlowHalo(haloColors(Ws.Amber), Modifier.size(222.dp), thickness = 4.dp, glow = 16.dp)
+        GlowHalo(haloColors(Ws.Amber), Modifier.size(222.dp), thickness = 4.dp, glow = 18.dp, line = false)
     }
 }

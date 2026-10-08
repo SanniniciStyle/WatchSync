@@ -29,7 +29,7 @@ import it.sanninicistyle.watchsync.ui.theme.Ws
  * of the box; its glow spills a little outside.
  */
 @Composable
-fun GlowHalo(colors: List<Color>, modifier: Modifier = Modifier, thickness: Dp = 4.dp, glow: Dp = 12.dp) {
+fun GlowHalo(colors: List<Color>, modifier: Modifier = Modifier, thickness: Dp = 4.dp, glow: Dp = 12.dp, line: Boolean = true) {
     val t = rememberInfiniteTransition(label = "halo")
     val turn by t.animateFloat(0f, 360f, infiniteRepeatable(tween(6_000, easing = LinearEasing)), label = "turn")
     val drift by t.animateFloat(0f, 360f, infiniteRepeatable(tween(9_500, easing = LinearEasing)), label = "drift")
@@ -43,8 +43,15 @@ fun GlowHalo(colors: List<Color>, modifier: Modifier = Modifier, thickness: Dp =
             ring(brush, turn, (thickness * 3).toPx(), alpha = 0.75f * breathe)
         }
         // The line: thin and crisp, drifting the other way, so the colours seem to flow
-        Canvas(Modifier.matchParentSize()) {
-            ring(brush, -drift, thickness.toPx(), alpha = 0.55f + 0.35f * breathe)
+        if (line) {
+            Canvas(Modifier.matchParentSize()) {
+                ring(brush, -drift, thickness.toPx(), alpha = 0.55f + 0.35f * breathe)
+            }
+        } else {
+            // Glow only: a second, softer haze drifting the other way keeps the colours moving
+            Canvas(Modifier.matchParentSize().blur(glow * 1.6f, BlurredEdgeTreatment.Unbounded)) {
+                ring(brush, -drift, (thickness * 4).toPx(), alpha = 0.45f * breathe)
+            }
         }
     }
 }

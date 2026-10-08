@@ -130,5 +130,5 @@ private fun Pill(color: Color, width: Float, height: Float, onClick: () -> Unit,
 /** The glowing halo along the edge of the screen while the alarm rings. */
 @Composable
 private fun Rings() {
-    GlowHalo(haloColors(Ws.Amber), Modifier.fillMaxSize().padding(8.dp), thickness = 4.dp, glow = 14.dp)
+    GlowHalo(haloColors(Ws.Amber), Modifier.fillMaxSize().padding(10.dp), thickness = 4.dp, glow = 16.dp, line = false)
 }
