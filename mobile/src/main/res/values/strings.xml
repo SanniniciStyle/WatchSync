@@ -87,4 +87,15 @@
     <string name="learn_riposo_done">Rest recognised</string>
     <string name="learn_riposo_done_hint">You can turn it off now</string>
     <string name="start">Start</string>
+    <string name="info">Info</string>
+    <string name="info_open">Open</string>
+    <string name="info_closed">Closed</string>
+    <string name="relearn_riposo">Recognise Rest again</string>
+    <string name="relearn_riposo_desc">Needed after changing the rules of the phone\'s Rest mode</string>
+    <string name="info_listener">Needed to see which mode is on and when an alarm rings on the phone.\n• WatchSync doesn\'t read or send the content of your notifications</string>
+    <string name="info_watch_setup">On Wear OS some permissions can only be granted through debugging. The phone grants them to the watch once, over Wi-Fi, then turns debugging off by itself.\n• Watch and phone must be on the same Wi-Fi network\n• Keep the watch screen on until the setup ends\n• Code refused or expired? Open \"Pair new device\" again on the watch and use the new code\n• At the end Android asks you to confirm that WatchSync manages the watch. The list of permissions shown is the standard one: WatchSync doesn\'t access calls, SMS or contacts\n• If the watch is reset or the app reinstalled, WatchSync tells you with a notification</string>
+    <string name="info_riposo">Android doesn\'t tell apps which mode is on: WatchSync recognises the phone\'s Rest mode by its rules (who can call, whether messages get through, what is hidden).\n• Rest must have rules different from Do not disturb, otherwise the two can\'t be told apart and it reaches the watch as Do not disturb\n• If you change the rules of Rest, recognise it again from Settings\n• When Rest starts on the watch, WatchSync turns on a Rest mode with the same rules on the phone, removed as soon as it ends</string>
+    <string name="info_fullscreen">Lets the watch\'s alarm show full screen even when the phone is locked.\n• Without it, it only arrives as a notification</string>
+    <string name="info_modes">Do not disturb and Rest are kept 1:1 between phone and watch, both ways.\n• They can\'t be on together: turning one on turns the other off\n• The phone\'s other modes (Work, Personal…) reach the watch as Do not disturb\n• The phone\'s Rest mode is recognised once \"Phone Rest mode\" is done in the setup</string>
+    <string name="info_alarms">When an alarm rings on the phone it rings on the watch too, and the other way round. Stop or snooze it on either one and it stops on both.\n• Phone: works with the phone\'s alarm app\n• Watch: works with Google\'s Clock app\n• Alarms aren\'t copied: each device keeps its own</string>
 </resources>

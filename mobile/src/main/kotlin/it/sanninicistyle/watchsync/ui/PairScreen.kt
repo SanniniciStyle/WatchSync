@@ -133,7 +133,7 @@ fun PairScreen(onBack: () -> Unit, onWatchReady: () -> Unit, vm: PairViewModel =
         else permissionLauncher.launch(localNetwork)
     }
 
-    ScreenScaffold(title = stringResource(R.string.pair_title), onBack = onBack) {
+    ScreenScaffold(title = stringResource(R.string.pair_title), onBack = onBack, info = R.string.info_watch_setup) {
         AnimatedContent(
             targetState = state is PairState.Input,
             transitionSpec = { (fadeIn(tween(260)) + scaleIn(initialScale = 0.96f)) togetherWith fadeOut(tween(160)) },

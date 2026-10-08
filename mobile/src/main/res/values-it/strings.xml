@@ -81,4 +81,15 @@
     <string name="learn_riposo_done">Riposo riconosciuto</string>
     <string name="learn_riposo_done_hint">Ora puoi disattivarlo</string>
     <string name="start">Inizia</string>
+    <string name="info">Informazioni</string>
+    <string name="info_open">Aperte</string>
+    <string name="info_closed">Chiuse</string>
+    <string name="relearn_riposo">Riconosci di nuovo il Riposo</string>
+    <string name="relearn_riposo_desc">Da rifare se cambi le regole del Riposo del telefono</string>
+    <string name="info_listener">Serve per vedere quale modalità è attiva e quando suona una sveglia sul telefono.\n• WatchSync non legge e non invia il contenuto delle tue notifiche</string>
+    <string name="info_watch_setup">Su Wear OS alcuni permessi si concedono solo tramite il debug. Il telefono li concede all\'orologio una volta sola via Wi-Fi, poi spegne il debug da solo.\n• Orologio e telefono devono essere sulla stessa rete Wi-Fi\n• Tieni acceso lo schermo dell\'orologio finché la procedura non finisce\n• Codice rifiutato o scaduto? Riapri \"Accoppia nuovo dispositivo\" sull\'orologio e usa il codice nuovo\n• Alla fine Android chiede di confermare che WatchSync gestisca l\'orologio. L\'elenco di permessi mostrato è quello standard: WatchSync non accede a chiamate, SMS o contatti\n• Se l\'orologio viene ripristinato o l\'app reinstallata, WatchSync te lo segnala con una notifica</string>
+    <string name="info_riposo">Android non dice alle app quale modalità è attiva: WatchSync riconosce il Riposo del telefono dalle sue regole (chi può chiamare, se passano i messaggi, cosa viene nascosto).\n• Il Riposo deve avere regole diverse da Non disturbare, altrimenti i due non si distinguono e arriva all\'orologio come Non disturbare\n• Se cambi le regole del Riposo, ripeti il riconoscimento da Impostazioni\n• Quando il Riposo parte dall\'orologio, sul telefono WatchSync attiva un Riposo con le stesse regole, che sparisce appena finisce</string>
+    <string name="info_fullscreen">Serve perché la sveglia dell\'orologio compaia a tutto schermo anche con il telefono bloccato.\n• Senza questo permesso arriva solo come notifica</string>
+    <string name="info_modes">Non disturbare e Riposo sono allineati 1:1 tra telefono e orologio, in entrambe le direzioni.\n• Non possono essere attivi insieme: accenderne uno spegne l\'altro\n• Le altre modalità del telefono (Lavoro, Personale…) arrivano all\'orologio come Non disturbare\n• Il Riposo del telefono viene riconosciuto se hai completato \"Riposo del telefono\" nella configurazione</string>
+    <string name="info_alarms">Quando suona una sveglia sul telefono suona anche sull\'orologio, e viceversa. Fermala o posponila su uno dei due e si ferma su entrambi.\n• Telefono: funziona con l\'app sveglia del telefono\n• Orologio: funziona con l\'app Orologio di Google\n• Le sveglie non vengono copiate: ogni dispositivo tiene le sue</string>
 </resources>

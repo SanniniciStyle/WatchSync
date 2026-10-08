@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,8 @@ data class SetupItem(
     val done: Boolean,
     /** Label of the button: "Allow" for a permission, "Start" for a guided step. */
     val action: Int = R.string.grant,
+    /** Help shown under the "i": what the step is for and how to fix it when it fails. */
+    val info: Int? = null,
     val onGrant: () -> Unit,
 )
 
@@ -72,8 +75,9 @@ private fun SetupRow(number: Int, item: SetupItem) {
         if (item.done) 1f else 0.92f,
         spring(dampingRatio = Spring.DampingRatioHighBouncy, stiffness = Spring.StiffnessMediumLow), label = "pop",
     )
+    var showInfo by rememberSaveable(item.title) { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp)) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -95,6 +99,9 @@ private fun SetupRow(number: Int, item: SetupItem) {
                 )
             }
         }
+        item.info?.let { InfoButton(expanded = showInfo, onToggle = { showInfo = !showInfo }) }
+    }
+    item.info?.let { InfoPanel(visible = showInfo, text = it, modifier = Modifier.padding(start = 44.dp)) }
     }
 }
 
@@ -111,7 +118,7 @@ fun setAppLanguage(context: Context, tag: String) {
 }
 
 @Composable
-fun SettingsScreen(setupItems: List<SetupItem>, version: String, onBack: () -> Unit) {
+fun SettingsScreen(setupItems: List<SetupItem>, version: String, onRelearnRiposo: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     var selected by remember { mutableStateOf(currentAppLanguage(context)) }
     ScreenScaffold(title = stringResource(R.string.settings), onBack = onBack) {
@@ -129,6 +136,20 @@ fun SettingsScreen(setupItems: List<SetupItem>, version: String, onBack: () -> U
         SectionTitle(stringResource(R.string.permissions))
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Ws.Surface).padding(vertical = 6.dp)) {
             setupItems.forEachIndexed { index, item -> SetupRow(index + 1, item) }
+        }
+        // The phone's Riposo is recognised by its rules: after changing them, learn it again
+        PressableSurface(onClick = onRelearnRiposo, color = Ws.Surface, shape = RoundedCornerShape(28.dp), modifier = Modifier.fillMaxWidth()) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                Icon(WsIcons.Moon, null, tint = Ws.Moon, modifier = Modifier.size(22.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.relearn_riposo), style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.relearn_riposo_desc), style = MaterialTheme.typography.bodyMedium, color = Ws.TextFaint)
+                }
+            }
         }
         SectionTitle(stringResource(R.string.about))
         Text(
@@ -162,7 +183,8 @@ private fun LanguageRow(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun ScreenScaffold(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
+fun ScreenScaffold(title: String, onBack: () -> Unit, info: Int? = null, content: @Composable () -> Unit) {
+    var showInfo by rememberSaveable(title) { mutableStateOf(false) }
     Column(
         Modifier
             .fillMaxSize()
@@ -181,8 +203,10 @@ fun ScreenScaffold(title: String, onBack: () -> Unit, content: @Composable () ->
                 colors = IconButtonDefaults.iconButtonColors(containerColor = Ws.Surface, contentColor = Ws.TextMuted),
                 modifier = Modifier.size(44.dp),
             ) { Icon(WsIcons.Back, contentDescription = stringResource(R.string.back)) }
-            Text(title, style = MaterialTheme.typography.headlineMedium)
+            Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            info?.let { InfoButton(expanded = showInfo, onToggle = { showInfo = !showInfo }) }
         }
+        info?.let { InfoPanel(visible = showInfo, text = it) }
         content()
     }
 }

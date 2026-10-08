@@ -24,6 +24,7 @@ object WsIcons {
             }
         }.build()
 
+    val Info = icon("Info", 2f, "M21 12a9 9 0 1 1-18 0a9 9 0 1 1 18 0z", "M12 11v5.5", "M12 7.6v.1")
     val Dnd = icon("Dnd", 2f, "M21 12a9 9 0 1 1-18 0a9 9 0 1 1 18 0z", "M7.5 12h9")
     val Moon = icon("Moon", 2f, "M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z")
     val Watch = icon("Watch", 1.8f, "M18 12a6 6 0 1 1-12 0a6 6 0 1 1 12 0z", "M9 6.8l1-3.3h4l1 3.3M9 17.2l1 3.3h4l1-3.3", "M12 12V9.5")

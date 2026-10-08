@@ -113,14 +113,14 @@ private fun App(openSetup: androidx.compose.runtime.MutableState<Boolean>, vm: H
         SetupItem(R.string.perm_notifications, R.string.perm_notifications_desc, permissions.notifications) {
             notificationsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         },
-        SetupItem(R.string.perm_listener, R.string.perm_listener_desc, permissions.listener) {
+        SetupItem(R.string.perm_listener, R.string.perm_listener_desc, permissions.listener, info = R.string.info_listener) {
             context.startActivity(Permissions.listenerSettings(context))
         },
         SetupItem(R.string.perm_dnd, R.string.perm_dnd_desc, permissions.dndAccess) {
             context.startActivity(Permissions.dndSettings())
         },
         // The watch is set up over adb first, then the phone confirms it may manage it
-        SetupItem(R.string.perm_watch_setup, R.string.perm_watch_setup_desc, permissions.watchReady && permissions.watchAssociated, R.string.start) {
+        SetupItem(R.string.perm_watch_setup, R.string.perm_watch_setup_desc, permissions.watchReady && permissions.watchAssociated, R.string.start, info = R.string.info_watch_setup) {
             // Already set up: only the phone's confirmation is missing, which needs the watch's address
             val address = watchAddress()
             when {
@@ -130,10 +130,10 @@ private fun App(openSetup: androidx.compose.runtime.MutableState<Boolean>, vm: H
                 else -> screen = Screen.PAIR
             }
         },
-        SetupItem(R.string.perm_riposo, R.string.perm_riposo_desc, permissions.riposoLearnt, R.string.start) {
+        SetupItem(R.string.perm_riposo, R.string.perm_riposo_desc, permissions.riposoLearnt, R.string.start, info = R.string.info_riposo) {
             screen = Screen.LEARN_RIPOSO
         },
-        SetupItem(R.string.perm_fullscreen, R.string.perm_fullscreen_desc, permissions.fullScreen) {
+        SetupItem(R.string.perm_fullscreen, R.string.perm_fullscreen_desc, permissions.fullScreen, info = R.string.info_fullscreen) {
             context.startActivity(Permissions.fullScreenSettings(context))
         },
     )
@@ -164,6 +164,7 @@ private fun App(openSetup: androidx.compose.runtime.MutableState<Boolean>, vm: H
             Screen.SETTINGS -> SettingsScreen(
                 setupItems = setupItems,
                 version = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
+                onRelearnRiposo = { screen = Screen.LEARN_RIPOSO },
                 onBack = { screen = Screen.HOME },
             )
         }

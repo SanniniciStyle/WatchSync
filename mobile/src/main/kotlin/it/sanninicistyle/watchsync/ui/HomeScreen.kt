@@ -50,6 +50,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -203,7 +206,7 @@ private fun WatchCard(watch: Peer?, watchAlarm: NextAlarm, ready: Boolean) {
 @Composable
 private fun ModesSection(modes: ModesUi, onToggle: (Mode) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionTitle(stringResource(R.string.modes))
+        SectionTitle(stringResource(R.string.modes), info = R.string.info_modes)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ModeTile(
                 title = stringResource(R.string.mode_dnd), icon = WsIcons.Dnd,
@@ -282,7 +285,7 @@ private fun ModeTile(
 private fun AlarmsSection(phoneAlarm: NextAlarm, watchAlarm: NextAlarm) {
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionTitle(stringResource(R.string.alarms))
+        SectionTitle(stringResource(R.string.alarms), info = R.string.info_alarms)
         Column(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(30.dp)).background(Ws.Surface).padding(horizontal = 22.dp, vertical = 20.dp),
         ) {
@@ -322,8 +325,18 @@ private fun AlarmsSection(phoneAlarm: NextAlarm, watchAlarm: NextAlarm) {
 }
 
 @Composable
-fun SectionTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.titleSmall, color = Color(0xFFC9D0DB), modifier = Modifier.padding(start = 4.dp))
+fun SectionTitle(text: String, info: Int? = null) {
+    var showInfo by rememberSaveable(text) { mutableStateOf(false) }
+    Column {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text, style = MaterialTheme.typography.titleSmall, color = Color(0xFFC9D0DB),
+                modifier = Modifier.padding(start = 4.dp).weight(1f),
+            )
+            info?.let { InfoButton(expanded = showInfo, onToggle = { showInfo = !showInfo }) }
+        }
+        info?.let { InfoPanel(visible = showInfo, text = it) }
+    }
 }
 
 /** A clickable surface that squashes a little while pressed, with a springy release. */

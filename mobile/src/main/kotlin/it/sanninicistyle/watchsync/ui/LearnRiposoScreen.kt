@@ -50,7 +50,7 @@ fun LearnRiposoScreen(onBack: () -> Unit) {
             if (!own.isActive && system.learnCurrent()) learnt = true else delay(700)
         }
     }
-    ScreenScaffold(title = stringResource(R.string.learn_riposo_title), onBack = onBack) {
+    ScreenScaffold(title = stringResource(R.string.learn_riposo_title), onBack = onBack, info = R.string.info_riposo) {
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Ws.Surface).padding(20.dp),
