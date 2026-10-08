@@ -15,8 +15,10 @@ import kotlinx.coroutines.delay
 class PhoneModes(context: Context) : LocalModes {
     private val nm = context.getSystemService(NotificationManager::class.java)
     val riposo = RiposoMode(context)
+    val systemRiposo = SystemRiposo(context)
 
-    override fun readBedtime(): Boolean = riposo.isActive
+    /** WatchSync's own Riposo (set from the watch or the app) or the phone's native one. */
+    override fun readBedtime(): Boolean = riposo.isActive || systemRiposo.isActive
 
     override fun readAnyDnd(): Boolean =
         nm.currentInterruptionFilter.let {
@@ -26,7 +28,7 @@ class PhoneModes(context: Context) : LocalModes {
 
     override suspend fun apply(dnd: Boolean, bedtime: Boolean) {
         if (bedtime) {
-            if (!riposo.isActive) riposo.setActive(true)
+            if (!readBedtime()) riposo.setActive(true)
             return
         }
         if (riposo.isActive) {

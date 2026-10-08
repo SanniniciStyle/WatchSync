@@ -34,5 +34,8 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
+    implementation(libs.libadb.android)
+    implementation(libs.conscrypt.android)
+    implementation(libs.bouncycastle.pkix)
     debugImplementation(libs.compose.ui.tooling)
 }

@@ -33,8 +33,6 @@
     <string name="perm_listener_desc">To see modes and alarms change</string>
     <string name="perm_dnd">Do not disturb access</string>
     <string name="perm_dnd_desc">To switch modes</string>
-    <string name="perm_watch">Link the watch</string>
-    <string name="perm_watch_desc">Lets WatchSync manage your watch\'s modes</string>
     <string name="perm_fullscreen">Full-screen alarms</string>
     <string name="perm_fullscreen_desc">To show the alarm on the locked screen</string>
     <string name="grant">Allow</string>
@@ -42,10 +40,6 @@
 
     <!-- Watch pairing -->
     <string name="pair_title">Connect the watch</string>
-    <string name="pair_step_dev">Developer options on</string>
-    <string name="pair_step_dev_desc">Settings › System › About › tap \"Build number\" 7 times</string>
-    <string name="pair_step_wireless">Wireless debugging › Pair new device</string>
-    <string name="pair_code">Code shown on the watch</string>
     <string name="pair_connect">Connect</string>
 
     <!-- Settings -->
@@ -60,4 +54,37 @@
     <string name="alarm_from_watch">Watch alarm</string>
     <string name="alarm_stop">Stop</string>
     <string name="alarm_snooze">Snooze</string>
+    <string name="pair_step_dev">Developer options on the watch</string>
+    <string name="pair_step_dev_hint">Settings › System › About › Versions › tap \"Build number\" 7 times</string>
+    <string name="pair_step_wireless">Wireless debugging</string>
+    <string name="pair_step_wireless_hint">Developer options › Wireless debugging › Pair new device</string>
+    <string name="pair_searching">Looking for the watch on Wi-Fi</string>
+    <string name="pair_found">Watch found · %1$s</string>
+    <string name="pair_progress_pair">Pairing</string>
+    <string name="pair_progress_connect">Connecting</string>
+    <string name="pair_progress_grant">Setting up the watch</string>
+    <string name="pair_progress_verify">Checking</string>
+    <string name="pair_done">Watch ready</string>
+    <string name="pair_done_desc">Wireless debugging on the watch has been turned off.</string>
+    <string name="pair_error_code">Wrong or expired code. Open \"Pair new device\" again on the watch.</string>
+    <string name="pair_error_app">WatchSync isn\'t installed on the watch. Install it from the Play Store on the watch.</string>
+    <string name="pair_error_grant">The watch refused a setting. Try again.</string>
+    <string name="pair_error_report">The watch didn\'t answer. Check that it\'s connected to the phone.</string>
+    <string name="perm_watch_setup">Watch setup</string>
+    <string name="done">Done</string>
+    <string name="retry">Try again</string>
+    <string name="watch_needs_setup">Connected · setup needed</string>
+    <string name="pair_error_connection">The watch\'s Wi-Fi connection dropped. Keep the watch screen on, with wireless debugging on, and try again.</string>
+    <string name="perm_watch_setup_desc">Once, over the watch\'s Wi-Fi, then confirm on the phone</string>
+    <string name="channel_setup">Watch setup</string>
+    <string name="watch_needs_setup_title">Set up the watch</string>
+    <string name="watch_needs_setup_text">Tap to finish setting up WatchSync on the watch</string>
+    <string name="perm_riposo">Phone Rest mode</string>
+    <string name="perm_riposo_desc">So the phone\'s own Rest mode becomes Rest on the watch</string>
+    <string name="learn_riposo_title">Phone Rest mode</string>
+    <string name="learn_riposo_step">Turn on Rest from the quick settings</string>
+    <string name="learn_riposo_hint">The phone\'s own, not WatchSync\'s</string>
+    <string name="learn_riposo_done">Rest recognised</string>
+    <string name="learn_riposo_done_hint">You can turn it off now</string>
+    <string name="start">Start</string>
 </resources>

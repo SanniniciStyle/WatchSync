@@ -30,18 +30,12 @@
     <string name="perm_listener_desc">Per vedere modalità e sveglie</string>
     <string name="perm_dnd">Accesso a Non disturbare</string>
     <string name="perm_dnd_desc">Per cambiare modalità</string>
-    <string name="perm_watch">Associa l\'orologio</string>
-    <string name="perm_watch_desc">WatchSync gestisce le modalità dell\'orologio</string>
     <string name="perm_fullscreen">Sveglie a schermo intero</string>
     <string name="perm_fullscreen_desc">Per mostrare la sveglia anche a schermo bloccato</string>
     <string name="grant">Consenti</string>
     <string name="granted">Fatto</string>
 
     <string name="pair_title">Collega l\'orologio</string>
-    <string name="pair_step_dev">Opzioni sviluppatore attive</string>
-    <string name="pair_step_dev_desc">Impostazioni › Sistema › Info › tocca 7 volte \"Numero build\"</string>
-    <string name="pair_step_wireless">Debug wireless › Accoppia nuovo dispositivo</string>
-    <string name="pair_code">Codice mostrato sull\'orologio</string>
     <string name="pair_connect">Collega</string>
 
     <string name="language">Lingua</string>
@@ -54,4 +48,37 @@
     <string name="alarm_from_watch">Sveglia dell\'orologio</string>
     <string name="alarm_stop">Stop</string>
     <string name="alarm_snooze">Posponi</string>
+    <string name="pair_step_dev">Opzioni sviluppatore sull\'orologio</string>
+    <string name="pair_step_dev_hint">Impostazioni › Sistema › Informazioni › Versioni › tocca 7 volte \"Numero build\"</string>
+    <string name="pair_step_wireless">Debug wireless</string>
+    <string name="pair_step_wireless_hint">Opzioni sviluppatore › Debug wireless › Accoppia nuovo dispositivo</string>
+    <string name="pair_searching">Cerco l\'orologio sul Wi-Fi</string>
+    <string name="pair_found">Orologio trovato · %1$s</string>
+    <string name="pair_progress_pair">Abbinamento</string>
+    <string name="pair_progress_connect">Connessione</string>
+    <string name="pair_progress_grant">Configurazione dell\'orologio</string>
+    <string name="pair_progress_verify">Verifica</string>
+    <string name="pair_done">Orologio pronto</string>
+    <string name="pair_done_desc">Il debug wireless dell\'orologio è stato spento.</string>
+    <string name="pair_error_code">Codice errato o scaduto. Riapri \"Accoppia nuovo dispositivo\" sull\'orologio.</string>
+    <string name="pair_error_app">WatchSync non è installata sull\'orologio. Installala dal Play Store dell\'orologio.</string>
+    <string name="pair_error_grant">L\'orologio ha rifiutato un\'impostazione. Riprova.</string>
+    <string name="pair_error_report">L\'orologio non ha risposto. Controlla che sia collegato al telefono.</string>
+    <string name="perm_watch_setup">Configura l\'orologio</string>
+    <string name="done">Fine</string>
+    <string name="retry">Riprova</string>
+    <string name="watch_needs_setup">Collegato · da configurare</string>
+    <string name="pair_error_connection">La connessione Wi-Fi con l\'orologio si è interrotta. Tieni lo schermo dell\'orologio acceso, con il debug wireless attivo, e riprova.</string>
+    <string name="perm_watch_setup_desc">Una sola volta, dal Wi-Fi dell\'orologio, poi conferma sul telefono</string>
+    <string name="channel_setup">Configurazione orologio</string>
+    <string name="watch_needs_setup_title">Configura l\'orologio</string>
+    <string name="watch_needs_setup_text">Tocca per completare la configurazione di WatchSync sull\'orologio</string>
+    <string name="perm_riposo">Riposo del telefono</string>
+    <string name="perm_riposo_desc">Perché il Riposo del telefono diventi Riposo sull\'orologio</string>
+    <string name="learn_riposo_title">Riposo del telefono</string>
+    <string name="learn_riposo_step">Attiva Riposo dal menu rapido</string>
+    <string name="learn_riposo_hint">Quello del telefono, non quello di WatchSync</string>
+    <string name="learn_riposo_done">Riposo riconosciuto</string>
+    <string name="learn_riposo_done_hint">Ora puoi disattivarlo</string>
+    <string name="start">Inizia</string>
 </resources>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Required by CompanionDeviceManager.associate() (the "manage your watch" dialog) -->
+    <uses-feature android:name="android.software.companion_device_setup" />
+
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <!-- Companion association with the watch: lets DND changes reach the global DND -->
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
@@ -11,6 +14,11 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- One-time setup of the watch over its wireless debugging (local Wi-Fi only) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Only to find an already paired watch for the "manage this watch" dialog -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <!-- Clock apps, to show the name of the app that set the next alarm -->
     <queries>

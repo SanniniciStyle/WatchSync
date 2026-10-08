@@ -24,12 +24,13 @@ class MainActivity : ComponentActivity() {
             val vm: WatchHomeViewModel = viewModel()
             val phone by vm.phone.collectAsStateWithLifecycle()
             val mode by vm.mode.collectAsStateWithLifecycle()
+            val ready by vm.ready.collectAsStateWithLifecycle()
             val nextAlarm by vm.nextAlarm.collectAsStateWithLifecycle()
             LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refresh() }
             MaterialTheme {
                 AppScaffold {
                     ScreenScaffold {
-                        WatchHome(phone = phone, mode = mode, nextAlarm = nextAlarm, onToggle = vm::toggle)
+                        WatchHome(phone = phone, ready = ready, mode = mode, nextAlarm = nextAlarm, onToggle = vm::toggle)
                     }
                 }
             }

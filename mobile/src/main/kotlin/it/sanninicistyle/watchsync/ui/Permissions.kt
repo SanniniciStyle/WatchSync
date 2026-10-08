@@ -10,6 +10,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import it.sanninicistyle.watchsync.PhoneModeListenerService
+import it.sanninicistyle.watchsync.SystemRiposo
+import it.sanninicistyle.watchsync.shared.PeerInfo
 
 /** Everything the phone app needs from the user, read live from the system. */
 data class Permissions(
@@ -18,8 +20,14 @@ data class Permissions(
     val dndAccess: Boolean,
     val watchAssociated: Boolean,
     val fullScreen: Boolean,
+    /** The watch app reported every grant it needs (set up over the watch's wireless debugging). */
+    val watchReady: Boolean,
+    /** WatchSync recognises the phone's own Riposo (learnt once). */
+    val riposoLearnt: Boolean,
 ) {
-    val allGranted get() = notifications && listener && dndAccess && watchAssociated && fullScreen
+    val allGranted get() = missing == 0
+
+    val missing get() = listOf(notifications, listener, dndAccess, watchReady && watchAssociated, riposoLearnt, fullScreen).count { !it }
 
     companion object {
         fun read(context: Context): Permissions {
@@ -34,6 +42,8 @@ data class Permissions(
                 dndAccess = nm.isNotificationPolicyAccessGranted,
                 watchAssociated = cdm.myAssociations.isNotEmpty(),
                 fullScreen = nm.canUseFullScreenIntent(),
+                watchReady = PeerInfo.watchStatus.value?.ready == true,
+                riposoLearnt = SystemRiposo(context).isLearnt,
             )
         }
 

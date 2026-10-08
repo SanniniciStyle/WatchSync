@@ -30,8 +30,19 @@ object WatchSetup {
             associated = cdm.myAssociations.isNotEmpty(),
             notifications = granted(Manifest.permission.POST_NOTIFICATIONS),
             appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
+            btAddress = prefs(context).getString(KEY_ADDRESS, "").orEmpty(),
         )
     }
+
+    /** Kept so the phone can find this watch again even after its app's data is gone. */
+    fun setAddress(context: Context, address: String) {
+        prefs(context).edit().putString(KEY_ADDRESS, address).apply()
+        report(context)
+    }
+
+    private fun prefs(context: Context) = context.getSharedPreferences("setup", Context.MODE_PRIVATE)
+
+    private const val KEY_ADDRESS = "bt_address"
 
     fun report(context: Context) {
         val app = context.applicationContext

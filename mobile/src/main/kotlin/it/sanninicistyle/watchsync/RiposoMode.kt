@@ -28,9 +28,13 @@ class RiposoMode(private val context: Context) {
         prefs.getString(KEY_ID, null)?.let { id ->
             val rule = nm.getAutomaticZenRule(id)
             if (rule != null) {
-                // Keep the mode's name in the app's current language
+                // Keep the mode's name in the app's current language, and its moon icon
                 val name = context.getString(R.string.riposo_name)
-                if (rule.name != name) runCatching { nm.updateAutomaticZenRule(id, rule.apply { setName(name) }) }
+                if (rule.name != name || rule.iconResId != R.drawable.ic_mode_riposo) {
+                    runCatching {
+                        nm.updateAutomaticZenRule(id, AutomaticZenRule.Builder(rule).setName(name).setIconResId(R.drawable.ic_mode_riposo).build())
+                    }
+                }
                 return id
             }
         }
@@ -49,7 +53,9 @@ class RiposoMode(private val context: Context) {
     val isActive: Boolean
         get() {
             val id = ensure() ?: return false
-            return nm.getAutomaticZenRuleState(id) == Condition.STATE_TRUE
+            val state = nm.getAutomaticZenRuleState(id)
+            DiagLog.d(TAG, "rule $id state=$state icon=${nm.getAutomaticZenRule(id)?.iconResId}")
+            return state == Condition.STATE_TRUE
         }
 
     fun setActive(active: Boolean) {
@@ -76,6 +82,7 @@ class RiposoMode(private val context: Context) {
             .build()
         return AutomaticZenRule.Builder(context.getString(R.string.riposo_name), CONDITION_ID)
             .setType(AutomaticZenRule.TYPE_OTHER)
+            .setIconResId(R.drawable.ic_mode_riposo)
             .setConfigurationActivity(ComponentName(context, MainActivity::class.java))
             .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
             .setZenPolicy(policy)

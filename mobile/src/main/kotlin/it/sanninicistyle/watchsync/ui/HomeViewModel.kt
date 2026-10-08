@@ -15,6 +15,7 @@ import it.sanninicistyle.watchsync.shared.NextAlarm
 import it.sanninicistyle.watchsync.shared.Peer
 import it.sanninicistyle.watchsync.shared.PeerInfo
 import it.sanninicistyle.watchsync.shared.PeerMessenger
+import it.sanninicistyle.watchsync.shared.StatusPaths
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -60,7 +61,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         app.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
         refresh()
         // Ask the watch for its next alarm so the screen never shows stale data
-        viewModelScope.launch(Dispatchers.IO) { PeerMessenger(app).send(InfoPaths.REQUEST) }
+        viewModelScope.launch(Dispatchers.IO) {
+            PeerMessenger(app).send(InfoPaths.REQUEST)
+            PeerMessenger(app).send(StatusPaths.REQUEST)
+        }
+        // The watch's setup state arrives over the Data Layer: re-read when it changes
+        viewModelScope.launch { PeerInfo.watchStatus.collect { refresh() } }
     }
 
     /** Re-reads everything from the system (also called when the screen resumes). */

@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import it.sanninicistyle.watchsync.R
@@ -48,18 +49,35 @@ val Figtree = FontFamily(
     variable(R.font.figtree, 600), variable(R.font.figtree, 700),
 )
 
-private val typography = Typography(
+private val baseTypography = Typography(
     displayLarge = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 60.sp, letterSpacing = (-0.04).em, lineHeight = 60.sp),
     displayMedium = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 52.sp, letterSpacing = (-0.035).em, lineHeight = 52.sp),
     headlineMedium = TextStyle(fontFamily = Sora, fontWeight = FontWeight.Bold, fontSize = 30.sp, letterSpacing = (-0.025).em, lineHeight = 34.sp),
-    titleLarge = TextStyle(fontFamily = Sora, fontWeight = FontWeight.Bold, fontSize = 20.sp, letterSpacing = (-0.01).em),
-    titleMedium = TextStyle(fontFamily = Sora, fontWeight = FontWeight.SemiBold, fontSize = 17.sp),
-    titleSmall = TextStyle(fontFamily = Sora, fontWeight = FontWeight.SemiBold, fontSize = 15.sp),
+    titleLarge = TextStyle(fontFamily = Sora, fontWeight = FontWeight.Bold, fontSize = 20.sp, letterSpacing = (-0.01).em, lineHeight = 26.sp),
+    titleMedium = TextStyle(fontFamily = Sora, fontWeight = FontWeight.SemiBold, fontSize = 17.sp, lineHeight = 22.sp),
+    titleSmall = TextStyle(fontFamily = Sora, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 20.sp),
     bodyLarge = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 23.sp),
     bodyMedium = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
-    labelLarge = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
-    labelMedium = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, letterSpacing = 0.04.em),
+    labelLarge = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 20.sp),
+    labelMedium = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, letterSpacing = 0.04.em, lineHeight = 16.sp),
 )
+
+private val centred = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both)
+
+private val typography = with(baseTypography) {
+    copy(
+        displayLarge = displayLarge.copy(lineHeightStyle = centred),
+        displayMedium = displayMedium.copy(lineHeightStyle = centred),
+        headlineMedium = headlineMedium.copy(lineHeightStyle = centred),
+        titleLarge = titleLarge.copy(lineHeightStyle = centred),
+        titleMedium = titleMedium.copy(lineHeightStyle = centred),
+        titleSmall = titleSmall.copy(lineHeightStyle = centred),
+        bodyLarge = bodyLarge.copy(lineHeightStyle = centred),
+        bodyMedium = bodyMedium.copy(lineHeightStyle = centred),
+        labelLarge = labelLarge.copy(lineHeightStyle = centred),
+        labelMedium = labelMedium.copy(lineHeightStyle = centred),
+    )
+}
 
 private val colors = darkColorScheme(
     primary = Ws.Amber, onPrimary = Ws.OnAmber,

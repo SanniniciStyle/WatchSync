@@ -99,9 +99,9 @@ fun HomeScreen(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(22.dp),
     ) {
-        TopBar(mode = modes.mode, connected = watch?.connected == true, onOpenSettings = onOpenSettings)
+        TopBar(mode = modes.mode, connected = watch?.connected == true && permissions.watchReady, onOpenSettings = onOpenSettings)
         if (!permissions.allGranted) SetupBanner(permissions, onOpenSetup)
-        WatchCard(watch = watch, watchAlarm = watchAlarm)
+        WatchCard(watch = watch, watchAlarm = watchAlarm, ready = permissions.watchReady)
         ModesSection(modes = modes, onToggle = onToggle)
         AlarmsSection(phoneAlarm = phoneAlarm, watchAlarm = watchAlarm)
         Spacer(Modifier.height(8.dp))
@@ -129,10 +129,7 @@ private fun TopBar(mode: Mode, connected: Boolean, onOpenSettings: () -> Unit) {
 
 @Composable
 private fun SetupBanner(permissions: Permissions, onOpenSetup: () -> Unit) {
-    val missing = listOf(
-        permissions.notifications, permissions.listener, permissions.dndAccess,
-        permissions.watchAssociated, permissions.fullScreen,
-    ).count { !it }
+    val missing = permissions.missing
     PressableSurface(
         onClick = onOpenSetup,
         color = Ws.Amber,
@@ -152,8 +149,12 @@ private fun SetupBanner(permissions: Permissions, onOpenSetup: () -> Unit) {
     }
 }
 
+/**
+ * The watch as it really is: "connected" only when it is in reach AND set up; in reach but not
+ * set up yet says so, since nothing would sync.
+ */
 @Composable
-private fun WatchCard(watch: Peer?, watchAlarm: NextAlarm) {
+private fun WatchCard(watch: Peer?, watchAlarm: NextAlarm, ready: Boolean) {
     val context = LocalContext.current
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(34.dp)).background(Ws.Surface).padding(20.dp),
@@ -161,7 +162,7 @@ private fun WatchCard(watch: Peer?, watchAlarm: NextAlarm) {
         horizontalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Box(Modifier.size(92.dp), contentAlignment = Alignment.Center) {
-            if (watch?.connected == true) Pulse(color = Ws.Mint)
+            if (watch?.connected == true) Pulse(color = if (ready) Ws.Mint else Ws.Amber)
             Box(
                 Modifier.size(92.dp).clip(CircleShape).background(Color(0xFF1E2632)).border(3.dp, Color(0xFF2C3644), CircleShape),
                 contentAlignment = Alignment.Center,
@@ -184,10 +185,13 @@ private fun WatchCard(watch: Peer?, watchAlarm: NextAlarm) {
             }
             val status = when {
                 watch == null -> stringResource(R.string.watch_none_hint)
-                watch.connected -> stringResource(R.string.watch_connected)
-                else -> stringResource(R.string.watch_disconnected)
+                !watch.connected -> stringResource(R.string.watch_disconnected)
+                !ready -> stringResource(R.string.watch_needs_setup)
+                else -> stringResource(R.string.watch_connected)
             }
-            val statusColor by animateColorAsState(if (watch?.connected == true) Ws.Mint else Ws.TextFaint, label = "status")
+            val statusColor by animateColorAsState(
+                when { watch?.connected != true -> Ws.TextFaint; !ready -> Ws.Amber; else -> Ws.Mint }, label = "status",
+            )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (watch != null) Box(Modifier.size(8.dp).clip(CircleShape).background(statusColor))
                 Text(status, style = MaterialTheme.typography.bodyMedium, color = Ws.TextMuted)
@@ -344,19 +348,20 @@ fun PressableSurface(
             .clip(shape)
             .background(color)
             .clickable(interactionSource = interaction, indication = androidx.compose.material3.ripple(), enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) { content() }
 }
 
 @Composable
-private fun Pulse(color: Color) {
+internal fun Pulse(color: Color, diameter: androidx.compose.ui.unit.Dp = 92.dp) {
     val t = rememberInfiniteTransition(label = "pulse")
     val p by t.animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = FastOutSlowInEasing), RepeatMode.Restart), label = "p")
-    Canvas(Modifier.size(92.dp)) {
+    Canvas(Modifier.size(diameter)) {
         drawCircle(color.copy(alpha = 0.5f * (1f - p)), radius = size.minDimension / 2f * (0.45f + 0.75f * p))
     }
 }
 
-private fun slideUp() =
+internal fun slideUp() =
     (slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { it / 2 } + fadeIn(tween(220))) togetherWith
         (slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it / 2 } + fadeOut(tween(160)))
 

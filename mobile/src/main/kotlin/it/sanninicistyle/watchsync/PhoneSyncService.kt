@@ -8,6 +8,7 @@ import com.google.android.gms.wearable.WearableListenerService
 import it.sanninicistyle.watchsync.shared.AlarmCommand
 import it.sanninicistyle.watchsync.shared.AlarmEvent
 import it.sanninicistyle.watchsync.shared.AlarmPaths
+import it.sanninicistyle.watchsync.adb.WatchIdentity
 import it.sanninicistyle.watchsync.shared.InfoPaths
 import it.sanninicistyle.watchsync.shared.InfoSync
 import it.sanninicistyle.watchsync.shared.ModeState
@@ -47,6 +48,8 @@ class PhoneSyncService : WearableListenerService() {
             InfoPaths.REQUEST -> InfoSync.sendNextAlarm(this, InfoPaths.PHONE_NEXT_ALARM)
             StatusPaths.WATCH -> runCatching { WatchStatus.decode(event.data) }.getOrNull()?.let {
                 PeerInfo.setWatchStatus(this, it)
+                WatchSetupAlert.update(this, it)
+                if (it.btAddress.isNotEmpty()) WatchIdentity.setAddress(this, it.btAddress)
             }
             else -> super.onMessageReceived(event)
         }

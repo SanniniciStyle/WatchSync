@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,7 +45,14 @@ import it.sanninicistyle.watchsync.ui.theme.Ws
 import java.util.Locale
 
 /** One requirement of the setup, with its live state and the action that grants it. */
-data class SetupItem(val title: Int, val description: Int, val done: Boolean, val onGrant: () -> Unit)
+data class SetupItem(
+    val title: Int,
+    val description: Int,
+    val done: Boolean,
+    /** Label of the button: "Allow" for a permission, "Start" for a guided step. */
+    val action: Int = R.string.grant,
+    val onGrant: () -> Unit,
+)
 
 @Composable
 fun SetupScreen(items: List<SetupItem>, onBack: () -> Unit) {
@@ -80,7 +88,9 @@ private fun SetupRow(number: Int, item: SetupItem) {
         if (!item.done) {
             PressableSurface(onClick = item.onGrant, color = Ws.Amber, shape = RoundedCornerShape(20.dp)) {
                 Text(
-                    stringResource(R.string.grant), style = MaterialTheme.typography.labelLarge, color = Ws.OnAmber,
+                    stringResource(item.action),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Ws.OnAmber,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                 )
             }
@@ -157,6 +167,8 @@ fun ScreenScaffold(title: String, onBack: () -> Unit, content: @Composable () ->
         Modifier
             .fillMaxSize()
             .background(Ws.Ground)
+            // The code keyboard must not cover the Connect button
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .statusBarsPadding()
             .navigationBarsPadding()

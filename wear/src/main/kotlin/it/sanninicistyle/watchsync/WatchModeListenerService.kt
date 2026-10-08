@@ -38,6 +38,7 @@ class WatchModeListenerService : NotificationListenerService() {
         )
         scheduleReport()
         WatchClockAlarms.scheduleNextCheck(this)
+        WatchSetup.report(this)
     }
 
     override fun onListenerDisconnected() {

@@ -35,8 +35,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import it.sanninicistyle.watchsync.adb.BondedWatch
+import it.sanninicistyle.watchsync.adb.WatchIdentity
+import it.sanninicistyle.watchsync.shared.DiagLog
 import it.sanninicistyle.watchsync.ui.HomeScreen
 import it.sanninicistyle.watchsync.ui.HomeViewModel
+import it.sanninicistyle.watchsync.ui.LearnRiposoScreen
+import it.sanninicistyle.watchsync.ui.PairScreen
 import it.sanninicistyle.watchsync.ui.Permissions
 import it.sanninicistyle.watchsync.ui.SettingsScreen
 import it.sanninicistyle.watchsync.ui.SetupItem
@@ -44,20 +49,36 @@ import it.sanninicistyle.watchsync.ui.SetupScreen
 import it.sanninicistyle.watchsync.ui.theme.WatchSyncTheme
 import java.util.concurrent.Executor
 
-private enum class Screen { HOME, SETUP, SETTINGS }
+private enum class Screen { HOME, SETUP, SETTINGS, PAIR, LEARN_RIPOSO }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContent { WatchSyncTheme { App() } }
+        openSetup.value = intent.getBooleanExtra(EXTRA_OPEN_SETUP, false)
+        setContent { WatchSyncTheme { App(openSetup) } }
+    }
+
+    // Opened from the "set up the watch" notification
+    private val openSetup = mutableStateOf(false)
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra(EXTRA_OPEN_SETUP, false)) openSetup.value = true
+    }
+
+    companion object {
+        const val EXTRA_OPEN_SETUP = "open_setup"
     }
 }
 
 @Composable
-private fun App(vm: HomeViewModel = viewModel()) {
+private fun App(openSetup: androidx.compose.runtime.MutableState<Boolean>, vm: HomeViewModel = viewModel()) {
     val context = LocalContext.current
     var screen by rememberSaveable { mutableStateOf(Screen.HOME) }
+    androidx.compose.runtime.LaunchedEffect(openSetup.value) {
+        if (openSetup.value) { screen = Screen.SETUP; openSetup.value = false }
+    }
     val watch by vm.watch.collectAsStateWithLifecycle()
     val modes by vm.modesUi.collectAsStateWithLifecycle()
     val phoneAlarm by vm.phoneAlarm.collectAsStateWithLifecycle()
@@ -66,10 +87,27 @@ private fun App(vm: HomeViewModel = viewModel()) {
 
     // Permissions are granted in system screens: re-read everything when we come back
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refresh() }
-    BackHandler(enabled = screen != Screen.HOME) { screen = Screen.HOME }
+    BackHandler(enabled = screen != Screen.HOME) { screen = if (screen == Screen.PAIR || screen == Screen.LEARN_RIPOSO) Screen.SETUP else Screen.HOME }
 
     val notificationsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { vm.refresh() }
-    val associationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { vm.refresh() }
+    val associationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+        DiagLog.d("Association", "dialog result ${it.resultCode}")
+        vm.refresh()
+    }
+
+    fun associateWatch(address: String) =
+        requestWatchAssociation(context.getSystemService(CompanionDeviceManager::class.java), context.mainExecutor, address) {
+            associationLauncher.launch(IntentSenderRequest.Builder(it).build())
+        }
+
+    /** The watch's address: recorded at setup, or found among the paired devices. */
+    fun watchAddress() = WatchIdentity.address(context)
+        ?: BondedWatch.address(context, watch?.name)?.also { WatchIdentity.setAddress(context, it) }
+
+    val bluetoothLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val address = if (granted) watchAddress() else null
+        if (address != null) associateWatch(address) else screen = Screen.PAIR
+    }
 
     val setupItems = listOf(
         SetupItem(R.string.perm_notifications, R.string.perm_notifications_desc, permissions.notifications) {
@@ -81,10 +119,19 @@ private fun App(vm: HomeViewModel = viewModel()) {
         SetupItem(R.string.perm_dnd, R.string.perm_dnd_desc, permissions.dndAccess) {
             context.startActivity(Permissions.dndSettings())
         },
-        SetupItem(R.string.perm_watch, R.string.perm_watch_desc, permissions.watchAssociated) {
-            requestWatchAssociation(context.getSystemService(CompanionDeviceManager::class.java), context.mainExecutor) {
-                associationLauncher.launch(IntentSenderRequest.Builder(it).build())
+        // The watch is set up over adb first, then the phone confirms it may manage it
+        SetupItem(R.string.perm_watch_setup, R.string.perm_watch_setup_desc, permissions.watchReady && permissions.watchAssociated, R.string.start) {
+            // Already set up: only the phone's confirmation is missing, which needs the watch's address
+            val address = watchAddress()
+            when {
+                !permissions.watchReady -> screen = Screen.PAIR
+                address != null -> associateWatch(address)
+                !BondedWatch.canRead(context) -> bluetoothLauncher.launch(BondedWatch.PERMISSION)
+                else -> screen = Screen.PAIR
             }
+        },
+        SetupItem(R.string.perm_riposo, R.string.perm_riposo_desc, permissions.riposoLearnt, R.string.start) {
+            screen = Screen.LEARN_RIPOSO
         },
         SetupItem(R.string.perm_fullscreen, R.string.perm_fullscreen_desc, permissions.fullScreen) {
             context.startActivity(Permissions.fullScreenSettings(context))
@@ -108,6 +155,12 @@ private fun App(vm: HomeViewModel = viewModel()) {
                 onOpenSettings = { screen = Screen.SETTINGS }, onOpenSetup = { screen = Screen.SETUP },
             )
             Screen.SETUP -> SetupScreen(items = setupItems, onBack = { screen = Screen.HOME })
+            Screen.LEARN_RIPOSO -> LearnRiposoScreen(onBack = { screen = Screen.SETUP })
+            Screen.PAIR -> PairScreen(
+                onBack = { screen = Screen.SETUP },
+                // Right after the watch is ready: the one confirmation the phone needs
+                onWatchReady = { if (!permissions.watchAssociated) watchAddress()?.let { associateWatch(it) } },
+            )
             Screen.SETTINGS -> SettingsScreen(
                 setupItems = setupItems,
                 version = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
@@ -121,15 +174,30 @@ private fun App(vm: HomeViewModel = viewModel()) {
  * Asks the user, through the system dialog, to let WatchSync manage the paired watch
  * (CompanionDeviceManager, watch profile). This is what allows changing the global DND.
  */
-private fun requestWatchAssociation(cdm: CompanionDeviceManager, executor: Executor, launch: (IntentSender) -> Unit) {
+private fun requestWatchAssociation(
+    cdm: CompanionDeviceManager,
+    executor: Executor,
+    address: String,
+    launch: (IntentSender) -> Unit,
+) {
+    // The watch is already paired and not discoverable: only its address finds it
     val request = AssociationRequest.Builder()
         .setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
-        .addDeviceFilter(BluetoothDeviceFilter.Builder().build())
-        .setSingleDevice(false)
+        .addDeviceFilter(BluetoothDeviceFilter.Builder().setAddress(address).build())
+        .setSingleDevice(true)
         .build()
+    runCatching { associate(cdm, request, executor, launch) }
+        .onFailure { DiagLog.w("Association", "request refused", it) }
+}
+
+private fun associate(cdm: CompanionDeviceManager, request: AssociationRequest, executor: Executor, launch: (IntentSender) -> Unit) {
     cdm.associate(request, executor, object : CompanionDeviceManager.Callback() {
-        override fun onAssociationPending(intentSender: IntentSender) = launch(intentSender)
-        override fun onAssociationCreated(associationInfo: AssociationInfo) = Unit
-        override fun onFailure(error: CharSequence?) = Unit
+        override fun onAssociationPending(intentSender: IntentSender) {
+            DiagLog.d("Association", "pending, showing the system dialog")
+            launch(intentSender)
+        }
+        override fun onAssociationCreated(associationInfo: AssociationInfo) =
+            DiagLog.d("Association", "created: ${associationInfo.displayName} ${associationInfo.deviceProfile}")
+        override fun onFailure(error: CharSequence?) = DiagLog.w("Association", "failed: $error")
     })
 }

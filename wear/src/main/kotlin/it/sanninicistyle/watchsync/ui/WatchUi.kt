@@ -56,6 +56,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
@@ -69,6 +70,7 @@ import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.Text
 import it.sanninicistyle.watchsync.R
 import it.sanninicistyle.watchsync.WatchModes
+import it.sanninicistyle.watchsync.WatchSetup
 import it.sanninicistyle.watchsync.shared.NextAlarm
 import it.sanninicistyle.watchsync.shared.Peer
 import it.sanninicistyle.watchsync.shared.PeerInfo
@@ -78,6 +80,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -116,6 +119,10 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
     val mode: StateFlow<Mode> = _mode.asStateFlow()
     private val _nextAlarm = MutableStateFlow(NextAlarm())
     val nextAlarm: StateFlow<NextAlarm> = _nextAlarm.asStateFlow()
+    private val _ready = MutableStateFlow(WatchSetup.read(app).ready)
+
+    /** Every grant the watch needs is in place (set up from the phone app). */
+    val ready: StateFlow<Boolean> = _ready.asStateFlow()
     val phone: StateFlow<Peer?> = PeerInfo.peer(app).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val receiver = object : BroadcastReceiver() {
@@ -136,6 +143,13 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
         )
         app.contentResolver.registerContentObserver(Settings.Global.getUriFor(WatchModes.BEDTIME_SETTING), false, bedtimeObserver)
         refresh()
+        // Grants arrive from the phone with no broadcast: look again until the setup is complete
+        viewModelScope.launch {
+            while (!_ready.value) {
+                delay(2_000)
+                _ready.value = WatchSetup.read(getApplication()).ready
+            }
+        }
     }
 
     fun refresh() {
@@ -143,6 +157,7 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
             val bedtime = modes.readBedtime()
             _mode.value = when { bedtime -> Mode.RIPOSO; modes.readAnyDnd() -> Mode.DND; else -> Mode.NONE }
             _nextAlarm.value = NextAlarm.read(getApplication())
+            _ready.value = WatchSetup.read(getApplication()).ready
         }
     }
 
@@ -163,19 +178,24 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
 }
 
 @Composable
-fun WatchHome(phone: Peer?, mode: Mode, nextAlarm: NextAlarm, onToggle: (Mode) -> Unit) {
+fun WatchHome(phone: Peer?, ready: Boolean, mode: Mode, nextAlarm: NextAlarm, onToggle: (Mode) -> Unit) {
     val context = LocalContext.current
     Column(
         Modifier.fillMaxSize().background(Ws.Ground).padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val dot by animateColorAsState(if (phone?.connected == true) Ws.Mint else Ws.TextFaint, label = "dot")
+        val dot by animateColorAsState(
+            when { phone?.connected != true -> Ws.TextFaint; !ready -> Ws.Amber; else -> Ws.Mint }, label = "dot",
+        )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (phone != null) Box(Modifier.size(7.dp).clip(CircleShape).background(dot))
             AnimatedContent(targetState = phone?.name, transitionSpec = { slideUp() }, label = "phone") { name ->
                 Text(name ?: stringResource(R.string.phone_none), style = BodyStyle, color = Ws.TextMuted, maxLines = 1)
             }
+        }
+        AnimatedContent(targetState = ready, transitionSpec = { slideUp() }, label = "ready") { isReady ->
+            if (!isReady) Text(stringResource(R.string.needs_setup), style = LabelStyle, color = Ws.Amber, maxLines = 2, textAlign = TextAlign.Center)
         }
         AnimatedContent(targetState = nextAlarm, transitionSpec = { slideUp() }, label = "alarm") { alarm ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -40,6 +40,12 @@ object PeerInfo {
         prefs(context).edit { putString(KEY_STATUS, android.util.Base64.encodeToString(status.encode(), 0)) }
     }
 
+    /** Forgets the last report, so the next one is known to be fresh. */
+    fun clearWatchStatus(context: Context) {
+        _watchStatus.value = null
+        prefs(context).edit { remove(KEY_STATUS) }
+    }
+
     fun setNextAlarm(context: Context, alarm: NextAlarm) {
         _nextAlarm.value = alarm
         prefs(context).edit {

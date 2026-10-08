@@ -15,6 +15,6 @@ class DebugReceiver : BroadcastReceiver() {
         val modes = WatchModes(context)
         intent.getStringExtra("dnd")?.let { modes.setDnd(it == "on") }
         intent.getStringExtra("bedtime")?.let { modes.setBedtime(it == "on") }
-        Log.d("DebugReceiver", "dnd=${modes.dnd} bedtime=${modes.bedtime} access=${modes.hasPolicyAccess}")
+        Log.d("DebugReceiver", "dnd=${modes.readAnyDnd()} bedtime=${modes.readBedtime()} access=${modes.hasPolicyAccess}")
     }
 }

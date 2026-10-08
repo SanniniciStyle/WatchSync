@@ -23,6 +23,8 @@ data class WatchStatus(
     @ProtoNumber(5) val associated: Boolean = false,
     @ProtoNumber(6) val notifications: Boolean = false,
     @ProtoNumber(7) val appVersion: String = "",
+    /** The watch's Bluetooth address, as the phone read it during setup ("" if unknown). */
+    @ProtoNumber(8) val btAddress: String = "",
 ) {
     val ready: Boolean
         get() = secureSettings && usageStats && listener && dndAccess && associated && notifications
@@ -40,4 +42,7 @@ object StatusPaths {
 
     /** Watch -> phone: the setup state. */
     const val WATCH = "/watchsync/status/watch"
+
+    /** Phone -> watch: the watch's Bluetooth address, for the watch to keep. */
+    const val ADDRESS = "/watchsync/status/address"
 }

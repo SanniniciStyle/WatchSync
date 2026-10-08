@@ -11,6 +11,9 @@ coroutines = "1.11.0"
 serialization = "1.11.0"
 datastore = "1.2.1"
 splashscreen = "1.2.0"
+libadb = "3.1.1"
+conscrypt = "2.7.0"
+bouncycastle = "1.86"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -31,6 +34,9 @@ play-services-wearable = { module = "com.google.android.gms:play-services-wearab
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
 kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }
+libadb-android = { module = "com.github.MuntashirAkon:libadb-android", version.ref = "libadb" }
+conscrypt-android = { module = "org.conscrypt:conscrypt-android", version.ref = "conscrypt" }
+bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk15to18", version.ref = "bouncycastle" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

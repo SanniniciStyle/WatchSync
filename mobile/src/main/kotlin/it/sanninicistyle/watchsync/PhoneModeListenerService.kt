@@ -31,9 +31,16 @@ class PhoneModeListenerService : NotificationListenerService() {
     }
 
     // Turning Riposo on or off always changes the interruption filter too
-    override fun onInterruptionFilterChanged(interruptionFilter: Int) = scheduleReport()
+    override fun onInterruptionFilterChanged(interruptionFilter: Int) {
+        DiagLog.d(TAG, "filter=$interruptionFilter policy=${getSystemService(android.app.NotificationManager::class.java).consolidatedNotificationPolicy}")
+        scheduleReport()
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        if (sbn.packageName != packageName && (sbn.isOngoing || sbn.packageName in SYSTEM_PKGS)) {
+            DiagLog.d(TAG, "posted ${sbn.packageName} tag=${sbn.tag} id=${sbn.id} ch=${sbn.notification.channelId} " +
+                "cat=${sbn.notification.category} title=${sbn.notification.extras.getCharSequence("android.title")}")
+        }
         PhoneSyncComponents.alarms.onPosted(sbn)?.let(::sendAlarm)
     }
 
@@ -63,5 +70,6 @@ class PhoneModeListenerService : NotificationListenerService() {
     private companion object {
         const val TAG = "PhoneModeListener"
         const val SETTLE_MS = 1_000L
+        val SYSTEM_PKGS = setOf("android", "com.android.systemui", "com.google.android.apps.wellbeing")
     }
 }

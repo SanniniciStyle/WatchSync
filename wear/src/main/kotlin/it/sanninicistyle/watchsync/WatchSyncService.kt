@@ -44,6 +44,7 @@ class WatchSyncService : WearableListenerService() {
             }
             InfoPaths.REQUEST -> InfoSync.sendNextAlarm(this, InfoPaths.WATCH_NEXT_ALARM)
             StatusPaths.REQUEST -> WatchSetup.report(this)
+            StatusPaths.ADDRESS -> WatchSetup.setAddress(this, String(event.data))
             else -> super.onMessageReceived(event)
         }
     }
