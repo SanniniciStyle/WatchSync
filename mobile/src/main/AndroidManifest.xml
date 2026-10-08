@@ -102,9 +102,10 @@
             android:turnScreenOn="true"
             android:taskAffinity="" />
 
+        <!-- System broadcasts only: not reachable by other apps -->
         <receiver
             android:name=".PhoneNextAlarmReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
             </intent-filter>

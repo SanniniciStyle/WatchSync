@@ -120,9 +120,10 @@
             android:name=".AlarmCheckReceiver"
             android:exported="false" />
 
+        <!-- System broadcasts only: not reachable by other apps -->
         <receiver
             android:name=".NextAlarmReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
