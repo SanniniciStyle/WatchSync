@@ -149,6 +149,7 @@ class WatchProvisioner(private val context: Context) {
             "pm grant $pkg android.permission.POST_NOTIFICATIONS",
             "appops set $pkg GET_USAGE_STATS allow",
             "appops set $pkg USE_FULL_SCREEN_INTENT allow",
+            "appops set $pkg SCHEDULE_EXACT_ALARM allow",
             "cmd notification allow_dnd $pkg",
             "cmd notification allow_listener $pkg/$pkg.WatchModeListenerService",
             associate,

@@ -41,6 +41,7 @@ import it.sanninicistyle.watchsync.shared.DiagLog
 import it.sanninicistyle.watchsync.ui.HomeScreen
 import it.sanninicistyle.watchsync.ui.HomeViewModel
 import it.sanninicistyle.watchsync.ui.LearnRiposoScreen
+import it.sanninicistyle.watchsync.ui.LicensesScreen
 import it.sanninicistyle.watchsync.ui.PairScreen
 import it.sanninicistyle.watchsync.ui.Permissions
 import it.sanninicistyle.watchsync.ui.SettingsScreen
@@ -49,7 +50,7 @@ import it.sanninicistyle.watchsync.ui.SetupScreen
 import it.sanninicistyle.watchsync.ui.theme.WatchSyncTheme
 import java.util.concurrent.Executor
 
-private enum class Screen { HOME, SETUP, SETTINGS, PAIR, LEARN_RIPOSO }
+private enum class Screen { HOME, SETUP, SETTINGS, PAIR, LEARN_RIPOSO, LICENSES }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +88,11 @@ private fun App(openSetup: androidx.compose.runtime.MutableState<Boolean>, vm: H
 
     // Permissions are granted in system screens: re-read everything when we come back
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refresh() }
-    BackHandler(enabled = screen != Screen.HOME) { screen = if (screen == Screen.PAIR || screen == Screen.LEARN_RIPOSO) Screen.SETUP else Screen.HOME }
+    BackHandler(enabled = screen != Screen.HOME) { screen = when (screen) {
+            Screen.PAIR, Screen.LEARN_RIPOSO -> Screen.SETUP
+            Screen.LICENSES -> Screen.SETTINGS
+            else -> Screen.HOME
+        } }
 
     val notificationsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { vm.refresh() }
     val associationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
@@ -156,6 +161,7 @@ private fun App(openSetup: androidx.compose.runtime.MutableState<Boolean>, vm: H
             )
             Screen.SETUP -> SetupScreen(items = setupItems, onBack = { screen = Screen.HOME })
             Screen.LEARN_RIPOSO -> LearnRiposoScreen(onBack = { screen = Screen.SETUP })
+            Screen.LICENSES -> LicensesScreen(onBack = { screen = Screen.SETTINGS })
             Screen.PAIR -> PairScreen(
                 onBack = { screen = Screen.SETUP },
                 // Right after the watch is ready: the one confirmation the phone needs
@@ -165,6 +171,7 @@ private fun App(openSetup: androidx.compose.runtime.MutableState<Boolean>, vm: H
                 setupItems = setupItems,
                 version = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
                 onRelearnRiposo = { screen = Screen.LEARN_RIPOSO },
+                onLicenses = { screen = Screen.LICENSES },
                 onBack = { screen = Screen.HOME },
             )
         }

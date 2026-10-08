@@ -98,4 +98,6 @@
     <string name="info_fullscreen">Lets the watch\'s alarm show full screen even when the phone is locked.\n• Without it, it only arrives as a notification</string>
     <string name="info_modes">Do not disturb and Rest are kept 1:1 between phone and watch, both ways.\n• They can\'t be on together: turning one on turns the other off\n• The phone\'s other modes (Work, Personal…) reach the watch as Do not disturb\n• The phone\'s Rest mode is recognised once \"Phone Rest mode\" is done in the setup</string>
     <string name="info_alarms">When an alarm rings on the phone it rings on the watch too, and the other way round. Stop or snooze it on either one and it stops on both.\n• Phone: works with the phone\'s alarm app\n• Watch: works with Google\'s Clock app\n• Alarms aren\'t copied: each device keeps its own</string>
+    <string name="licenses">Open source licences</string>
+    <string name="licenses_lgpl_note">spake2-java is used under the LGPL 3.0, which builds on the GPL 3.0 below. Its source code is at github.com/MuntashirAkon/spake2-java.</string>
 </resources>

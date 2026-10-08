@@ -15,14 +15,18 @@ import java.util.Locale
 object DiagLog {
     @Volatile
     private var file: File? = null
+
+    @Volatile
+    private var debuggable = true
     private val time = SimpleDateFormat("HH:mm:ss.SSS", Locale.ROOT)
 
     fun init(context: Context) {
-        val debuggable = context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        debuggable = context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
         file = if (debuggable) File(context.filesDir, "diag.log") else null
     }
 
     fun d(tag: String, message: String) {
+        if (!debuggable) return
         Log.d(tag, message)
         write("D", tag, message)
     }

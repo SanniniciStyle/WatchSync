@@ -25,9 +25,11 @@ data class WatchStatus(
     @ProtoNumber(7) val appVersion: String = "",
     /** The watch's Bluetooth address, as the phone read it during setup ("" if unknown). */
     @ProtoNumber(8) val btAddress: String = "",
+    /** Checking the clock at the exact second an alarm is due. */
+    @ProtoNumber(9) val exactAlarms: Boolean = false,
 ) {
     val ready: Boolean
-        get() = secureSettings && usageStats && listener && dndAccess && associated && notifications
+        get() = secureSettings && usageStats && listener && dndAccess && associated && notifications && exactAlarms
 
     fun encode(): ByteArray = ProtoBuf.encodeToByteArray(this)
 

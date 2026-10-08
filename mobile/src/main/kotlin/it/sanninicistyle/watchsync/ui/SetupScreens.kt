@@ -118,7 +118,7 @@ fun setAppLanguage(context: Context, tag: String) {
 }
 
 @Composable
-fun SettingsScreen(setupItems: List<SetupItem>, version: String, onRelearnRiposo: () -> Unit, onBack: () -> Unit) {
+fun SettingsScreen(setupItems: List<SetupItem>, version: String, onRelearnRiposo: () -> Unit, onLicenses: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     var selected by remember { mutableStateOf(currentAppLanguage(context)) }
     ScreenScaffold(title = stringResource(R.string.settings), onBack = onBack) {
@@ -152,6 +152,12 @@ fun SettingsScreen(setupItems: List<SetupItem>, version: String, onRelearnRiposo
             }
         }
         SectionTitle(stringResource(R.string.about))
+        PressableSurface(onClick = onLicenses, color = Ws.Surface, shape = RoundedCornerShape(28.dp), modifier = Modifier.fillMaxWidth()) {
+            Text(
+                stringResource(R.string.licenses), style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 18.dp),
+            )
+        }
         Text(
             stringResource(R.string.version, version), style = MaterialTheme.typography.bodyMedium, color = Ws.TextFaint,
             modifier = Modifier.padding(start = 4.dp),

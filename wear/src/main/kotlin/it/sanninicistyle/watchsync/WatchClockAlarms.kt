@@ -38,7 +38,12 @@ object WatchClockAlarms {
         }
         val at = next.triggerTime + CHECK_DELAY_MS
         // One check per alarm time, so a following alarm can't replace a check still pending
-        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, checkIntent(context, next.triggerTime))
+        // Exact when allowed (granted during setup); otherwise within a few seconds, still in doze
+        if (am.canScheduleExactAlarms()) {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, checkIntent(context, next.triggerTime))
+        } else {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, checkIntent(context, next.triggerTime))
+        }
         DiagLog.d(TAG, "check scheduled at $at for ${next.showIntent?.creatorPackage}")
     }
 

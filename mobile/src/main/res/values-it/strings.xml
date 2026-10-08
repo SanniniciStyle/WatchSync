@@ -92,4 +92,6 @@
     <string name="info_fullscreen">Serve perché la sveglia dell\'orologio compaia a tutto schermo anche con il telefono bloccato.\n• Senza questo permesso arriva solo come notifica</string>
     <string name="info_modes">Non disturbare e Riposo sono allineati 1:1 tra telefono e orologio, in entrambe le direzioni.\n• Non possono essere attivi insieme: accenderne uno spegne l\'altro\n• Le altre modalità del telefono (Lavoro, Personale…) arrivano all\'orologio come Non disturbare\n• Il Riposo del telefono viene riconosciuto se hai completato \"Riposo del telefono\" nella configurazione</string>
     <string name="info_alarms">Quando suona una sveglia sul telefono suona anche sull\'orologio, e viceversa. Fermala o posponila su uno dei due e si ferma su entrambi.\n• Telefono: funziona con l\'app sveglia del telefono\n• Orologio: funziona con l\'app Orologio di Google\n• Le sveglie non vengono copiate: ogni dispositivo tiene le sue</string>
+    <string name="licenses">Licenze open source</string>
+    <string name="licenses_lgpl_note">spake2-java è usato con licenza LGPL 3.0, che si basa sulla GPL 3.0 qui sotto. Il suo codice sorgente è su github.com/MuntashirAkon/spake2-java.</string>
 </resources>

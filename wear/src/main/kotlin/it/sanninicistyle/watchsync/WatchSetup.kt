@@ -1,6 +1,7 @@
 package it.sanninicistyle.watchsync
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.AppOpsManager
 import android.app.NotificationManager
 import android.companion.CompanionDeviceManager
@@ -31,6 +32,7 @@ object WatchSetup {
             notifications = granted(Manifest.permission.POST_NOTIFICATIONS),
             appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
             btAddress = prefs(context).getString(KEY_ADDRESS, "").orEmpty(),
+            exactAlarms = context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms(),
         )
     }
 
