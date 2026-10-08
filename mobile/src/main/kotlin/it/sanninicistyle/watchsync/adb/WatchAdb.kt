@@ -95,7 +95,7 @@ class WatchAdbConnection private constructor(
 
     companion object {
         private const val TAG = "WatchAdb"
-        private const val SHELL_TIMEOUT_MS = 30_000L
+        private const val SHELL_TIMEOUT_MS = 15_000L
         private const val EXIT_MARK = "__ws_exit="
 
         fun create(context: Context): WatchAdbConnection {
