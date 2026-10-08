@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WatchSync</string>
-    <string name="channel_alarms">Sveglie del telefono</string>
-    <string name="channel_monitor">Monitoraggio sveglie</string>
-    <string name="monitor_running">Sveglia sincronizzata con il telefono</string>
-    <string name="alarm_from_phone">Sveglia del telefono</string>
+    <string name="app_name" translatable="false">WatchSync</string>
+    <string name="phone_none">No phone</string>
+    <string name="no_alarm">No alarm set</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="mode_dnd_short">DND</string>
+    <string name="mode_riposo">Rest</string>
+    <string name="mode_on">On</string>
+    <string name="mode_off">Off</string>
+    <string name="channel_alarms">Phone alarms</string>
+    <string name="channel_monitor">Alarm monitor</string>
+    <string name="monitor_running">Alarm synced with the phone</string>
+    <string name="alarm_from_phone">From the phone</string>
     <string name="alarm_stop">Stop</string>
-    <string name="alarm_snooze">Posponi</string>
+    <string name="alarm_snooze">Snooze</string>
 </resources>

@@ -26,7 +26,13 @@ class RiposoMode(private val context: Context) {
     fun ensure(): String? {
         if (!nm.isNotificationPolicyAccessGranted) return null
         prefs.getString(KEY_ID, null)?.let { id ->
-            if (nm.getAutomaticZenRule(id) != null) return id
+            val rule = nm.getAutomaticZenRule(id)
+            if (rule != null) {
+                // Keep the mode's name in the app's current language
+                val name = context.getString(R.string.riposo_name)
+                if (rule.name != name) runCatching { nm.updateAutomaticZenRule(id, rule.apply { setName(name) }) }
+                return id
+            }
         }
         val id = try {
             nm.addAutomaticZenRule(buildRule(withGrayscale = true))
@@ -50,7 +56,7 @@ class RiposoMode(private val context: Context) {
         val id = ensure() ?: return
         val state = if (active) Condition.STATE_TRUE else Condition.STATE_FALSE
         nm.setAutomaticZenRuleState(
-            id, Condition(CONDITION_ID, NAME, state, Condition.SOURCE_CONTEXT)
+            id, Condition(CONDITION_ID, context.getString(R.string.riposo_name), state, Condition.SOURCE_CONTEXT)
         )
         DiagLog.d(TAG, "Riposo -> $active")
     }
@@ -68,7 +74,7 @@ class RiposoMode(private val context: Context) {
             .allowConversations(ZenPolicy.CONVERSATION_SENDERS_NONE)
             .hideAllVisualEffects()
             .build()
-        return AutomaticZenRule.Builder(NAME, CONDITION_ID)
+        return AutomaticZenRule.Builder(context.getString(R.string.riposo_name), CONDITION_ID)
             .setType(AutomaticZenRule.TYPE_OTHER)
             .setConfigurationActivity(ComponentName(context, MainActivity::class.java))
             .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
@@ -86,7 +92,6 @@ class RiposoMode(private val context: Context) {
     private companion object {
         const val TAG = "RiposoMode"
         const val KEY_ID = "rule_id"
-        const val NAME = "Riposo"
         val CONDITION_ID: Uri = Uri.parse("condition://it.sanninicistyle.watchsync/riposo")
     }
 }

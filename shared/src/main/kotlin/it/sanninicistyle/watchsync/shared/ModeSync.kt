@@ -36,8 +36,8 @@ class ModeSync(
     /** Current state of this device as the peer should see it. */
     fun currentState(now: Long = System.currentTimeMillis()): ModeState {
         val bedtime = local.readBedtime()
-        // While Bedtime is on, DND is on because of it: keep the last known user choice instead
-        val dnd = if (bedtime) prefs.getBoolean(KEY_DND, false) else local.readAnyDnd()
+        // DND and Bedtime are exclusive: Bedtime turns DND on by itself, so it never counts as DND
+        val dnd = !bedtime && local.readAnyDnd()
         return ModeState(dnd = dnd, bedtime = bedtime, changedAt = now)
     }
 

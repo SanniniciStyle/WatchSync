@@ -11,6 +11,8 @@ import android.content.Intent
 import android.provider.AlarmClock
 import android.util.Log
 import it.sanninicistyle.watchsync.shared.AlarmAction
+import it.sanninicistyle.watchsync.shared.InfoPaths
+import it.sanninicistyle.watchsync.shared.InfoSync
 
 /**
  * Alarms of the watch's own clock app. Wear clock apps ring with a full-screen activity and no
@@ -94,5 +96,6 @@ class AlarmCheckReceiver : BroadcastReceiver() {
 class NextAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         WatchClockAlarms.scheduleNextCheck(context)
+        InfoSync.sendNextAlarm(context, InfoPaths.WATCH_NEXT_ALARM, goAsync())
     }
 }

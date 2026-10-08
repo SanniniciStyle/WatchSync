@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="riposo_name">Riposo</string>
+    <string name="riposo_trigger">Sincronizzato con il Riposo dell\'orologio</string>
+
+    <string name="settings">Impostazioni</string>
+    <string name="back">Indietro</string>
+    <string name="watch_connected">Collegato</string>
+    <string name="watch_disconnected">Non raggiungibile</string>
+    <string name="watch_none">Nessun orologio</string>
+    <string name="watch_none_hint">Abbina l\'orologio al telefono, poi apri WatchSync sull\'orologio</string>
+    <string name="modes">Modalità</string>
+    <string name="mode_dnd">Non disturbare</string>
+    <string name="mode_riposo">Riposo</string>
+    <string name="mode_on">Attivo</string>
+    <string name="mode_off">Spento</string>
+    <string name="alarms">Sveglie</string>
+    <string name="next_alarm">Prossima · %1$s</string>
+    <string name="no_alarm">Nessuna sveglia</string>
+    <string name="watch_alarms">Sull\'orologio</string>
+    <string name="today">Oggi</string>
+    <string name="tomorrow">Domani</string>
+    <string name="setup_needed">Completa la configurazione</string>
+    <string name="setup_missing">Mancano %1$d passaggi</string>
+
+    <string name="setup_title">Configurazione</string>
+    <string name="perm_notifications">Notifiche</string>
+    <string name="perm_notifications_desc">Per suonare quando suona l\'orologio</string>
+    <string name="perm_listener">Accesso alle notifiche</string>
+    <string name="perm_listener_desc">Per vedere modalità e sveglie</string>
+    <string name="perm_dnd">Accesso a Non disturbare</string>
+    <string name="perm_dnd_desc">Per cambiare modalità</string>
+    <string name="perm_watch">Associa l\'orologio</string>
+    <string name="perm_watch_desc">WatchSync gestisce le modalità dell\'orologio</string>
+    <string name="perm_fullscreen">Sveglie a schermo intero</string>
+    <string name="perm_fullscreen_desc">Per mostrare la sveglia anche a schermo bloccato</string>
+    <string name="grant">Consenti</string>
+    <string name="granted">Fatto</string>
+
+    <string name="pair_title">Collega l\'orologio</string>
+    <string name="pair_step_dev">Opzioni sviluppatore attive</string>
+    <string name="pair_step_dev_desc">Impostazioni › Sistema › Info › tocca 7 volte \"Numero build\"</string>
+    <string name="pair_step_wireless">Debug wireless › Accoppia nuovo dispositivo</string>
+    <string name="pair_code">Codice mostrato sull\'orologio</string>
+    <string name="pair_connect">Collega</string>
+
+    <string name="language">Lingua</string>
+    <string name="language_system">Lingua del telefono</string>
+    <string name="permissions">Permessi</string>
+    <string name="about">Informazioni</string>
+    <string name="version">Versione %1$s</string>
+
+    <string name="channel_alarms">Sveglie dell\'orologio</string>
+    <string name="alarm_from_watch">Sveglia dell\'orologio</string>
+    <string name="alarm_stop">Stop</string>
+    <string name="alarm_snooze">Posponi</string>
+</resources>

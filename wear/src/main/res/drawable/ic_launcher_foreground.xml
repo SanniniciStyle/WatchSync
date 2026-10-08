@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- WatchSync: a watch face held by two sync arcs, amber (DND, alarms) and moon lavender (Rest) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M28,39 A30,30 0 0,1 80,39" android:strokeColor="#FFFFB547" android:strokeWidth="4.5" android:strokeLineCap="round" />
+    <path android:pathData="M80,39 l-1.2,-7.6 M80,39 l-7.6,1.6" android:strokeColor="#FFFFB547" android:strokeWidth="4.5" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M80,69 A30,30 0 0,1 28,69" android:strokeColor="#FFA9B4FF" android:strokeWidth="4.5" android:strokeLineCap="round" />
+    <path android:pathData="M28,69 l1.2,7.6 M28,69 l7.6,-1.6" android:strokeColor="#FFA9B4FF" android:strokeWidth="4.5" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M54,37 a17,17 0 1,0 0.01,0 z" android:fillColor="#FF141A23" android:strokeColor="#FFEEF1F6" android:strokeWidth="3.5" />
+    <path android:pathData="M54,54 V44.5" android:strokeColor="#FFFFB547" android:strokeWidth="3.5" android:strokeLineCap="round" />
+    <path android:pathData="M54,51.2 a2.8,2.8 0 1,0 0.01,0 z" android:fillColor="#FFEEF1F6" />
+</vector>

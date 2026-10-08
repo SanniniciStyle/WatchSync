@@ -7,7 +7,11 @@ import com.google.android.gms.wearable.WearableListenerService
 import it.sanninicistyle.watchsync.shared.AlarmCommand
 import it.sanninicistyle.watchsync.shared.AlarmEvent
 import it.sanninicistyle.watchsync.shared.AlarmPaths
+import it.sanninicistyle.watchsync.shared.InfoPaths
+import it.sanninicistyle.watchsync.shared.InfoSync
 import it.sanninicistyle.watchsync.shared.ModeState
+import it.sanninicistyle.watchsync.shared.NextAlarm
+import it.sanninicistyle.watchsync.shared.PeerInfo
 import it.sanninicistyle.watchsync.shared.SyncPaths
 import kotlinx.coroutines.runBlocking
 
@@ -32,6 +36,11 @@ class WatchSyncService : WearableListenerService() {
             AlarmPaths.COMMAND -> runCatching { AlarmCommand.decode(event.data) }.getOrNull()?.let {
                 if (!WatchSyncComponents.alarms.execute(it)) WatchAlarmMonitorService.command(this, it.action)
             }
+            // The phone's next alarm changed
+            InfoPaths.PHONE_NEXT_ALARM -> runCatching { NextAlarm.decode(event.data) }.getOrNull()?.let {
+                PeerInfo.setNextAlarm(this, it)
+            }
+            InfoPaths.REQUEST -> InfoSync.sendNextAlarm(this, InfoPaths.WATCH_NEXT_ALARM)
             else -> super.onMessageReceived(event)
         }
     }
