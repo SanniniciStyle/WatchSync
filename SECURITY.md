@@ -40,13 +40,12 @@ rather than flaws:
 
 A manual review focused on WatchSync's threat model (a device on the home network posing as the
 watch during setup) found the pairing sound — the SPAKE2 secret is bound to the TLS session as in
-Android's adb, and fails closed — and no leaks of keys or of the code. It found robustness issues:
-no limit on the packet size a peer may announce (an out-of-memory crash), no timeouts (a hang),
-unbounded buffering. WatchSync guards against what it can from its side: every adb call runs
-under a time limit that drops the connection when it expires, and errors thrown back by the
-library, out-of-memory ones included, end the setup with an error. An oversized packet handled on
-the library's own reader thread can still crash the app; that needs a fix in the library (a cap on
-the announced packet size, as Android's adb has), which we plan to propose upstream.
+Android's adb, and fails closed — and no leaks of keys or of the code. It also found robustness
+issues, which we reported to the maintainer (privately where appropriate) with fixes. In the
+meantime WatchSync runs every adb call under a time limit that drops the connection when it
+expires, and turns errors thrown back by the library into a failed setup instead of a crash.
 
-We also fixed a stream-handling bug in it while building WatchSync (upstream pull request
-[#35](https://github.com/MuntashirAkon/libadb-android/pull/35)).
+We also proposed fixes upstream for the bugs we hit: pull requests
+[#35](https://github.com/MuntashirAkon/libadb-android/pull/35) (stream end),
+[#36](https://github.com/MuntashirAkon/libadb-android/pull/36) (waits that could block forever) and
+[#37](https://github.com/MuntashirAkon/libadb-android/pull/37) (`Builder.connect()`).
