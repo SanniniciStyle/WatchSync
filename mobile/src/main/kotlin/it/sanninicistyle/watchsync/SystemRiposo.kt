@@ -45,6 +45,14 @@ class SystemRiposo(context: Context) {
         return true
     }
 
+    /** The native Riposo's rules, for WatchSync's own Riposo to behave the same. */
+    fun learntPolicy(): NotificationManager.Policy? {
+        val v = prefs.getString(KEY_SIGNATURE, null)?.split("|")?.mapNotNull(String::toIntOrNull) ?: return null
+        if (v.size != 6) return null
+        // filter | categories | call senders | message senders | conversation senders | hidden effects
+        return NotificationManager.Policy(v[1], v[2], v[3], v[5], v[4])
+    }
+
     private fun signature(p: NotificationManager.Policy) = listOf(
         p.priorityCategories, p.priorityCallSenders, p.priorityMessageSenders,
         p.priorityConversationSenders, p.suppressedVisualEffects,

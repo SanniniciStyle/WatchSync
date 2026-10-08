@@ -26,7 +26,7 @@ class PhoneModeListenerService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         DiagLog.d(TAG, "connected")
-        scope.launch { PhoneSyncComponents.modes(this@PhoneModeListenerService).riposo.ensure() }
+        scope.launch { PhoneSyncComponents.modes(this@PhoneModeListenerService).riposo.cleanUp() }
         scheduleReport()
     }
 
@@ -69,7 +69,8 @@ class PhoneModeListenerService : NotificationListenerService() {
 
     private companion object {
         const val TAG = "PhoneModeListener"
-        const val SETTLE_MS = 1_000L
+        // Long enough for a mode switch to settle (e.g. Riposo applying its rules), short enough to feel instant
+        const val SETTLE_MS = 400L
         val SYSTEM_PKGS = setOf("android", "com.android.systemui", "com.google.android.apps.wellbeing")
     }
 }

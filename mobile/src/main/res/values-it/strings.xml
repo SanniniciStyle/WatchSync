@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="riposo_name">Riposo</string>
-    <string name="riposo_trigger">Sincronizzato con il Riposo dell\'orologio</string>
+    <string name="riposo_trigger">Dall\'orologio</string>
 
     <string name="settings">Impostazioni</string>
     <string name="back">Indietro</string>

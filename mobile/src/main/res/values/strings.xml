@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">WatchSync</string>
     <string name="riposo_name">Rest</string>
-    <string name="riposo_trigger">Synced with the watch\'s Bedtime mode</string>
+    <string name="riposo_trigger">From the watch</string>
 
     <!-- Home -->
     <string name="settings">Settings</string>
