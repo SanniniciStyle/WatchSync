@@ -8,3 +8,5 @@ captures/
 *.keystore
 *.jks
 keystore.properties
+docs/raw/*.mp4
+docs/raw/*_strip.png

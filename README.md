@@ -14,6 +14,19 @@ fills the gaps, both ways:
 
 No account, no cloud of its own, no ads, no tracking. Free software under the GPL.
 
+<p align="center">
+  <img src="docs/media/sync_demo.gif" alt="Do Not Disturb turned on from the phone shows up on the watch" width="420">
+  &nbsp;&nbsp;
+  <img src="docs/media/alarm_demo.gif" alt="A watch alarm ringing on the phone" width="210">
+</p>
+
+<p align="center">
+  <img src="docs/media/phone_screens.png" alt="WatchSync on the phone: home, Do Not Disturb, Rest, a watch alarm ringing" width="800">
+</p>
+<p align="center">
+  <img src="docs/media/watch_screens.png" alt="WatchSync on the watch: home, Do Not Disturb, Rest, a phone alarm ringing" width="640">
+</p>
+
 ## Requirements
 
 - An Android phone running Android 15 or later.
