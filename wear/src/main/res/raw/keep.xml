@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Licence texts of the bundled fonts and libraries: shipped with the app, never shrunk away -->
-<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@raw/license_*" />
+<!-- Resources read by name, never from code, that resource shrinking must keep:
+     the Wear OS capability Google Play services advertises to the other device, and the licence
+     texts shipped with the app -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@array/android_wear_capabilities,@raw/license_*" />
