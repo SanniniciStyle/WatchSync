@@ -13,6 +13,12 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.format.DateFormat
 import androidx.compose.animation.AnimatedContent
+import it.sanninicistyle.watchsync.shared.PeerMessenger
+import it.sanninicistyle.watchsync.shared.InfoPaths
+import kotlinx.coroutines.flow.combine
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -113,12 +119,25 @@ val LabelStyle = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBol
 
 enum class Mode { NONE, DND, RIPOSO }
 
+data class UpcomingAlarm(val triggerAt: Long, val fromPhone: Boolean)
+
 class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
     private val modes = WatchModes(app)
     private val _mode = MutableStateFlow(Mode.NONE)
     val mode: StateFlow<Mode> = _mode.asStateFlow()
     private val _nextAlarm = MutableStateFlow(NextAlarm())
-    val nextAlarm: StateFlow<NextAlarm> = _nextAlarm.asStateFlow()
+
+    /**
+     * The next alarm that will ring on the watch: its own, or the phone's (mirrored here), whichever
+     * comes first.
+     */
+    val nextAlarm: StateFlow<UpcomingAlarm?> = combine(_nextAlarm, PeerInfo.nextAlarm) { own, phone ->
+        val now = System.currentTimeMillis()
+        listOfNotNull(
+            own.takeIf { it.triggerAt > now }?.let { UpcomingAlarm(it.triggerAt, fromPhone = false) },
+            phone.takeIf { it.triggerAt > now }?.let { UpcomingAlarm(it.triggerAt, fromPhone = true) },
+        ).minByOrNull { it.triggerAt }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
     private val _ready = MutableStateFlow(WatchSetup.read(app).ready)
 
     /** Every grant the watch needs is in place (set up from the phone app). */
@@ -143,6 +162,8 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
         )
         app.contentResolver.registerContentObserver(Settings.Global.getUriFor(WatchModes.BEDTIME_SETTING), false, bedtimeObserver)
         refresh()
+        // The phone's next alarm, fresh (it also arrives by itself whenever it changes)
+        viewModelScope.launch(Dispatchers.IO) { PeerMessenger(app).send(InfoPaths.REQUEST) }
         // Grants arrive from the phone with no broadcast: look again until the setup is complete
         viewModelScope.launch {
             while (!_ready.value) {
@@ -178,44 +199,62 @@ class WatchHomeViewModel(app: Application) : AndroidViewModel(app) {
 }
 
 @Composable
-fun WatchHome(phone: Peer?, ready: Boolean, mode: Mode, nextAlarm: NextAlarm, onToggle: (Mode) -> Unit) {
+fun WatchHome(phone: Peer?, ready: Boolean, mode: Mode, nextAlarm: UpcomingAlarm?, onToggle: (Mode) -> Unit) {
     val context = LocalContext.current
-    Column(
-        Modifier.fillMaxSize().background(Ws.Ground).padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        val dot by animateColorAsState(
-            when { phone?.connected != true -> Ws.TextFaint; !ready -> Ws.Amber; else -> Ws.Mint }, label = "dot",
-        )
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (phone != null) Box(Modifier.size(7.dp).clip(CircleShape).background(dot))
-            AnimatedContent(targetState = phone?.name, transitionSpec = { slideUp() }, label = "phone") { name ->
-                Text(name ?: stringResource(R.string.phone_none), style = BodyStyle, color = Ws.TextMuted, maxLines = 1)
-            }
-        }
-        AnimatedContent(targetState = ready, transitionSpec = { slideUp() }, label = "ready") { isReady ->
-            if (!isReady) Text(stringResource(R.string.needs_setup), style = LabelStyle, color = Ws.Amber, maxLines = 2, textAlign = TextAlign.Center)
-        }
-        AnimatedContent(targetState = nextAlarm, transitionSpec = { slideUp() }, label = "alarm") { alarm ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (alarm.exists) {
-                    Text(DateFormat.getTimeFormat(context).format(Date(alarm.triggerAt)), style = TimeStyle, color = Ws.Text)
-                    Text(relativeDay(context, alarm.triggerAt), style = BodyStyle, color = Ws.TextFaint)
-                } else {
-                    Text(stringResource(R.string.no_alarm), style = BodyStyle, color = Ws.TextFaint)
+    // Laid out for a ~213 dp round screen and scaled to the real one; everything stays inside the
+    // circle (the widest row sits near the centre, where the circle is widest)
+    BoxWithConstraints(Modifier.fillMaxSize().background(Ws.Ground), contentAlignment = Alignment.Center) {
+        val k = (minOf(maxWidth, maxHeight).value / 213f).coerceIn(0.8f, 1.3f)
+        Column(
+            Modifier.fillMaxSize().padding(horizontal = (26 * k).dp, vertical = (20 * k).dp),
+            verticalArrangement = Arrangement.spacedBy((4 * k).dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            val dot by animateColorAsState(
+                when { phone?.connected != true -> Ws.TextFaint; !ready -> Ws.Amber; else -> Ws.Mint }, label = "dot",
+            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((5 * k).dp)) {
+                if (phone != null) Box(Modifier.size((6 * k).dp).clip(CircleShape).background(dot))
+                AnimatedContent(targetState = phone?.name, transitionSpec = { slideUp() }, label = "phone") { name ->
+                    Text(
+                        name ?: stringResource(R.string.phone_none), style = BodyStyle.copy(fontSize = (13 * k).sp),
+                        color = Ws.TextMuted, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 4.dp)) {
-            ModeChip(stringResource(R.string.mode_dnd_short), WatchIcons.Dnd, mode == Mode.DND, Ws.Amber, Ws.OnAmber) { onToggle(Mode.DND) }
-            ModeChip(stringResource(R.string.mode_riposo), WatchIcons.Moon, mode == Mode.RIPOSO, Ws.Moon, Ws.OnMoon) { onToggle(Mode.RIPOSO) }
+            AnimatedVisibility(visible = !ready) {
+                Text(
+                    stringResource(R.string.needs_setup), style = LabelStyle.copy(fontSize = (11 * k).sp),
+                    color = Ws.Amber, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                )
+            }
+            AnimatedContent(targetState = nextAlarm, transitionSpec = { slideUp() }, label = "alarm") { alarm ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (alarm != null) {
+                        Text(
+                            DateFormat.getTimeFormat(context).format(Date(alarm.triggerAt)),
+                            style = TimeStyle.copy(fontSize = (40 * k).sp), color = Ws.Text, maxLines = 1,
+                        )
+                        val day = relativeDay(context, alarm.triggerAt)
+                        Text(
+                            if (alarm.fromPhone) stringResource(R.string.alarm_day_phone, day) else day,
+                            style = BodyStyle.copy(fontSize = (12 * k).sp), color = Ws.TextFaint, maxLines = 1,
+                        )
+                    } else {
+                        Text(stringResource(R.string.no_alarm), style = BodyStyle.copy(fontSize = (13 * k).sp), color = Ws.TextFaint)
+                    }
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy((8 * k).dp), modifier = Modifier.padding(top = (4 * k).dp)) {
+                ModeChip(stringResource(R.string.mode_dnd_short), WatchIcons.Dnd, mode == Mode.DND, Ws.Amber, Ws.OnAmber, k) { onToggle(Mode.DND) }
+                ModeChip(stringResource(R.string.mode_riposo), WatchIcons.Moon, mode == Mode.RIPOSO, Ws.Moon, Ws.OnMoon, k) { onToggle(Mode.RIPOSO) }
+            }
         }
     }
 }
 
 @Composable
-private fun ModeChip(label: String, icon: ImageVector, on: Boolean, accent: Color, onAccent: Color, onClick: () -> Unit) {
+private fun ModeChip(label: String, icon: ImageVector, on: Boolean, accent: Color, onAccent: Color, k: Float, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.93f else 1f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium), label = "press")
@@ -225,17 +264,17 @@ private fun ModeChip(label: String, icon: ImageVector, on: Boolean, accent: Colo
     val state = stringResource(if (on) R.string.mode_on else R.string.mode_off)
     Column(
         Modifier
-            .size(88.dp)
+            .size(width = (64 * k).dp, height = (58 * k).dp)
             .scale(scale)
-            .clip(RoundedCornerShape(32.dp))
+            .clip(RoundedCornerShape((24 * k).dp))
             .background(bg)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .semantics { role = Role.Switch; stateDescription = state },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(26.dp).scale(iconScale))
-        Text(label, style = LabelStyle, color = fg, maxLines = 1)
+        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size((22 * k).dp).scale(iconScale))
+        Text(label, style = LabelStyle.copy(fontSize = (11 * k).sp), color = fg, maxLines = 1)
     }
 }
 

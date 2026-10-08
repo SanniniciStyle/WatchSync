@@ -20,6 +20,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,21 +85,28 @@ class WatchAlarmRingActivity : ComponentActivity() {
 
 @Composable
 private fun RingScreen(time: String, label: String, canSnooze: Boolean, onStop: () -> Unit, onSnooze: () -> Unit) {
-    Box(Modifier.fillMaxSize().background(Ws.Ground), contentAlignment = Alignment.Center) {
+    // Sized from the screen so the buttons stay inside the round display
+    BoxWithConstraints(Modifier.fillMaxSize().background(Ws.Ground), contentAlignment = Alignment.Center) {
+        val k = (minOf(maxWidth, maxHeight).value / 213f).coerceIn(0.8f, 1.3f)
         Rings()
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(stringResource(R.string.alarm_from_phone).uppercase(), style = LabelStyle, color = Ws.Amber)
-            Text(time.ifBlank { label }, style = TimeStyle.copy(fontSize = 60.sp), color = Ws.Text, maxLines = 1)
-            if (time.isNotBlank() && label.isNotBlank()) Text(label, style = BodyStyle, color = Ws.TextMuted, maxLines = 1)
-            Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy((2 * k).dp)) {
+            Text(stringResource(R.string.alarm_from_phone).uppercase(), style = LabelStyle.copy(fontSize = (11 * k).sp), color = Ws.Amber)
+            Text(time.ifBlank { label }, style = TimeStyle.copy(fontSize = (46 * k).sp), color = Ws.Text, maxLines = 1)
+            if (time.isNotBlank() && label.isNotBlank()) {
+                Text(
+                    label, style = BodyStyle.copy(fontSize = (12 * k).sp), color = Ws.TextMuted, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = (36 * k).dp),
+                )
+            }
+            Row(Modifier.padding(top = (8 * k).dp), horizontalArrangement = Arrangement.spacedBy((8 * k).dp)) {
                 if (canSnooze) {
                     val snooze = stringResource(R.string.alarm_snooze)
-                    Pill(color = Ws.Chip, width = 76, onClick = onSnooze, modifier = Modifier.semantics { contentDescription = snooze }) {
-                        Icon(WatchIcons.Snooze, contentDescription = null, tint = Ws.Text, modifier = Modifier.size(24.dp))
+                    Pill(color = Ws.Chip, width = 54 * k, height = 46 * k, onClick = onSnooze, modifier = Modifier.semantics { contentDescription = snooze }) {
+                        Icon(WatchIcons.Snooze, contentDescription = null, tint = Ws.Text, modifier = Modifier.size((22 * k).dp))
                     }
                 }
-                Pill(color = Ws.Amber, width = 104, onClick = onStop) {
-                    Text(stringResource(R.string.alarm_stop), style = LabelStyle.copy(fontSize = 17.sp), color = Ws.OnAmber)
+                Pill(color = Ws.Amber, width = 82 * k, height = 46 * k, onClick = onStop) {
+                    Text(stringResource(R.string.alarm_stop), style = LabelStyle.copy(fontSize = (15 * k).sp), color = Ws.OnAmber)
                 }
             }
         }
@@ -105,12 +114,12 @@ private fun RingScreen(time: String, label: String, canSnooze: Boolean, onStop: 
 }
 
 @Composable
-private fun Pill(color: Color, width: Int, onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun Pill(color: Color, width: Float, height: Float, onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.92f else 1f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium), label = "press")
     Box(
-        modifier.width(width.dp).height(56.dp).scale(scale).clip(RoundedCornerShape(28.dp)).background(color)
+        modifier.width(width.dp).height(height.dp).scale(scale).clip(RoundedCornerShape((height / 2).dp)).background(color)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { content() }

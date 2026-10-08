@@ -15,5 +15,6 @@
     <string name="alarm_from_phone">From the phone</string>
     <string name="alarm_stop">Stop</string>
     <string name="alarm_snooze">Snooze</string>
-    <string name="needs_setup">Set up from the phone app</string>
+    <string name="needs_setup">Setup needed</string>
+    <string name="alarm_day_phone">%1$s · phone</string>
 </resources>

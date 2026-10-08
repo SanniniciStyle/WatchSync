@@ -14,5 +14,6 @@
     <string name="alarm_from_phone">Dal telefono</string>
     <string name="alarm_stop">Stop</string>
     <string name="alarm_snooze">Posponi</string>
-    <string name="needs_setup">Da configurare dall\'app del telefono</string>
+    <string name="needs_setup">Da configurare</string>
+    <string name="alarm_day_phone">%1$s · telefono</string>
 </resources>
