@@ -17,12 +17,12 @@ import androidx.wear.compose.material3.Text
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { WatchSyncApp() }
+        setContent { WatchHome() }
     }
 }
 
 @Composable
-private fun WatchSyncApp() {
+private fun WatchHome() {
     MaterialTheme {
         AppScaffold {
             ScreenScaffold {

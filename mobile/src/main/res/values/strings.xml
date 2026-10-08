@@ -2,4 +2,8 @@
 <resources>
     <string name="app_name">WatchSync</string>
     <string name="riposo_trigger">Sincronizzata con il Riposo dell\'orologio</string>
+    <string name="channel_alarms">Sveglie dell\'orologio</string>
+    <string name="alarm_from_watch">Sveglia dell\'orologio</string>
+    <string name="alarm_stop">Stop</string>
+    <string name="alarm_snooze">Posponi</string>
 </resources>

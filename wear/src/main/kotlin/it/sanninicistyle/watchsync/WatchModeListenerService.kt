@@ -1,11 +1,16 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.DiagLog
 import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
+import android.service.notification.StatusBarNotification
 import android.util.Log
+import it.sanninicistyle.watchsync.shared.AlarmEvent
+import it.sanninicistyle.watchsync.shared.AlarmPaths
+import it.sanninicistyle.watchsync.shared.PeerMessenger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,11 +32,12 @@ class WatchModeListenerService : NotificationListenerService() {
     }
 
     override fun onListenerConnected() {
-        Log.d(TAG, "connected")
+        DiagLog.d(TAG, "connected")
         contentResolver.registerContentObserver(
             Settings.Global.getUriFor(WatchModes.BEDTIME_SETTING), false, bedtimeObserver
         )
         scheduleReport()
+        WatchClockAlarms.scheduleNextCheck(this)
     }
 
     override fun onListenerDisconnected() {
@@ -39,6 +45,20 @@ class WatchModeListenerService : NotificationListenerService() {
     }
 
     override fun onInterruptionFilterChanged(interruptionFilter: Int) = scheduleReport()
+
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
+        WatchSyncComponents.alarms.onPosted(sbn)?.let(::sendAlarm)
+    }
+
+    override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        WatchSyncComponents.alarms.onRemoved(sbn)?.let(::sendAlarm)
+    }
+
+    private fun sendAlarm(event: AlarmEvent) {
+        scope.launch {
+            PeerMessenger(this@WatchModeListenerService).send(AlarmPaths.EVENT, event.encode())
+        }
+    }
 
     /** Bedtime and DND change a few hundred ms apart: report once both have settled. */
     private fun scheduleReport() {

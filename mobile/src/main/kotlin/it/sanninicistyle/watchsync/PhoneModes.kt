@@ -1,5 +1,6 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.DiagLog
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
@@ -37,14 +38,14 @@ class PhoneModes(context: Context) : LocalModes {
 
     fun setDnd(on: Boolean) {
         if (!nm.isNotificationPolicyAccessGranted) {
-            Log.w(TAG, "DND access not granted")
+            DiagLog.w(TAG, "DND access not granted")
             return
         }
         nm.setInterruptionFilter(
             if (on) NotificationManager.INTERRUPTION_FILTER_PRIORITY
             else NotificationManager.INTERRUPTION_FILTER_ALL
         )
-        Log.d(TAG, "setDnd($on)")
+        DiagLog.d(TAG, "setDnd($on)")
     }
 
     private companion object {

@@ -1,22 +1,37 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.DiagLog
 import android.util.Log
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
+import it.sanninicistyle.watchsync.shared.AlarmCommand
+import it.sanninicistyle.watchsync.shared.AlarmEvent
+import it.sanninicistyle.watchsync.shared.AlarmPaths
 import it.sanninicistyle.watchsync.shared.ModeState
 import it.sanninicistyle.watchsync.shared.SyncPaths
 import kotlinx.coroutines.runBlocking
 
-/** Receives the phone's state. onMessageReceived already runs on a worker thread. */
+/** Receives the phone's modes and alarms. onMessageReceived already runs on a worker thread. */
 class WatchSyncService : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
-        val sync = WatchSyncComponents.modeSync(this)
+        DiagLog.d(TAG, "from phone: ${event.path} (${event.data.size} bytes)")
         when (event.path) {
             SyncPaths.PHONE_STATE -> runBlocking {
                 val state = runCatching { ModeState.decode(event.data) }.getOrNull()
-                if (state == null) Log.w(TAG, "bad state payload") else sync.onRemoteState(state)
+                if (state == null) DiagLog.w(TAG, "bad state payload")
+                else WatchSyncComponents.modeSync(this@WatchSyncService).onRemoteState(state)
             }
-            SyncPaths.STATE_REQUEST -> runBlocking { sync.pushCurrent() }
+            SyncPaths.STATE_REQUEST -> runBlocking {
+                WatchSyncComponents.modeSync(this@WatchSyncService).pushCurrent()
+            }
+            // An alarm of the phone started or stopped ringing
+            AlarmPaths.EVENT -> runCatching { AlarmEvent.decode(event.data) }.getOrNull()?.let {
+                if (it.ringing) WatchAlarmRingService.ring(this, it) else WatchAlarmRingService.remoteStopped(this)
+            }
+            // The user stopped or snoozed this watch's alarm from the phone
+            AlarmPaths.COMMAND -> runCatching { AlarmCommand.decode(event.data) }.getOrNull()?.let {
+                if (!WatchSyncComponents.alarms.execute(it)) WatchAlarmMonitorService.command(this, it.action)
+            }
             else -> super.onMessageReceived(event)
         }
     }

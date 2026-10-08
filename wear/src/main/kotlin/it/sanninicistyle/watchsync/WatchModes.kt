@@ -1,5 +1,6 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.DiagLog
 import android.app.NotificationManager
 import android.content.Context
 import android.provider.Settings
@@ -44,21 +45,21 @@ class WatchModes(private val context: Context) : LocalModes {
 
     fun setDnd(on: Boolean) {
         if (!hasPolicyAccess) {
-            Log.w(TAG, "DND access not granted")
+            DiagLog.w(TAG, "DND access not granted")
             return
         }
         val filter = if (on) NotificationManager.INTERRUPTION_FILTER_PRIORITY
         else NotificationManager.INTERRUPTION_FILTER_ALL
         nm.setInterruptionFilter(filter)
-        Log.d(TAG, "setDnd($on)")
+        DiagLog.d(TAG, "setDnd($on)")
     }
 
     /** Needs WRITE_SECURE_SETTINGS, granted once over adb during setup. */
     fun setBedtime(on: Boolean): Boolean = try {
         Settings.Global.putInt(context.contentResolver, BEDTIME_SETTING, if (on) 1 else 0)
-            .also { Log.d(TAG, "setBedtime($on) -> $it") }
+            .also { DiagLog.d(TAG, "setBedtime($on) -> $it") }
     } catch (e: SecurityException) {
-        Log.w(TAG, "WRITE_SECURE_SETTINGS not granted", e)
+        DiagLog.w(TAG, "WRITE_SECURE_SETTINGS not granted", e)
         false
     }
 

@@ -51,10 +51,10 @@ class ModeSync(
 
         val state = currentState()
         if (state.sameModesAs(lastSynced())) {
-            Log.d(TAG, "local change already in sync: $state")
+            DiagLog.d(TAG, "local change already in sync: $state")
             return
         }
-        Log.d(TAG, "local change -> peer: $state")
+        DiagLog.d(TAG, "local change -> peer: $state")
         remember(state)
         messenger.send(outPath, state.encode())
     }
@@ -63,19 +63,19 @@ class ModeSync(
     suspend fun onRemoteState(remote: ModeState) {
         val mine = currentState()
         if (remote.sameModesAs(mine)) {
-            Log.d(TAG, "remote already matches: $remote")
+            DiagLog.d(TAG, "remote already matches: $remote")
             remember(remote)
             return
         }
         val last = lastSynced()
         if (remote.changedAt < last.changedAt && !mine.sameModesAs(last)) {
             // We changed after the peer did: our state wins, send it back
-            Log.d(TAG, "local newer than remote, resending $mine")
+            DiagLog.d(TAG, "local newer than remote, resending $mine")
             remember(mine)
             messenger.send(outPath, mine.encode())
             return
         }
-        Log.d(TAG, "applying remote $remote (local was $mine)")
+        DiagLog.d(TAG, "applying remote $remote (local was $mine)")
         remember(remote)
         prefs.edit { putLong(KEY_APPLYING_UNTIL, System.currentTimeMillis() + SETTLE_MS) }
         local.apply(dnd = remote.dnd, bedtime = remote.bedtime)

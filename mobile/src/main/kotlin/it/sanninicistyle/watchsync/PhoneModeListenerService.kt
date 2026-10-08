@@ -1,7 +1,12 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.DiagLog
 import android.service.notification.NotificationListenerService
+import android.service.notification.StatusBarNotification
 import android.util.Log
+import it.sanninicistyle.watchsync.shared.AlarmEvent
+import it.sanninicistyle.watchsync.shared.AlarmPaths
+import it.sanninicistyle.watchsync.shared.PeerMessenger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -11,21 +16,36 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Long-lived listener that notices DND and Riposo changes on the phone and reports them.
- * It does not read notifications: the binding just keeps it alive and delivers DND changes.
+ * Long-lived listener that notices DND and Riposo changes on the phone and reports them, and
+ * spots alarms of clock apps while they ring so the watch can ring too. Other notifications are
+ * ignored and never leave the phone.
  */
 class PhoneModeListenerService : NotificationListenerService() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var pending: Job? = null
 
     override fun onListenerConnected() {
-        Log.d(TAG, "connected")
+        DiagLog.d(TAG, "connected")
         scope.launch { PhoneSyncComponents.modes(this@PhoneModeListenerService).riposo.ensure() }
         scheduleReport()
     }
 
     // Turning Riposo on or off always changes the interruption filter too
     override fun onInterruptionFilterChanged(interruptionFilter: Int) = scheduleReport()
+
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
+        PhoneSyncComponents.alarms.onPosted(sbn)?.let(::sendAlarm)
+    }
+
+    override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        PhoneSyncComponents.alarms.onRemoved(sbn)?.let(::sendAlarm)
+    }
+
+    private fun sendAlarm(event: AlarmEvent) {
+        scope.launch {
+            PeerMessenger(this@PhoneModeListenerService).send(AlarmPaths.EVENT, event.encode())
+        }
+    }
 
     private fun scheduleReport() {
         pending?.cancel()

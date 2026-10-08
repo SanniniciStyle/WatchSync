@@ -1,5 +1,6 @@
 package it.sanninicistyle.watchsync
 
+import it.sanninicistyle.watchsync.shared.DiagLog
 import android.app.AutomaticZenRule
 import android.app.NotificationManager
 import android.content.ComponentName
@@ -31,11 +32,11 @@ class RiposoMode(private val context: Context) {
             nm.addAutomaticZenRule(buildRule(withGrayscale = true))
         } catch (e: IllegalArgumentException) {
             // Some device effects may be reserved to system apps: fall back without them
-            Log.w(TAG, "rule with grayscale rejected, retrying without", e)
+            DiagLog.w(TAG, "rule with grayscale rejected, retrying without", e)
             nm.addAutomaticZenRule(buildRule(withGrayscale = false))
         }
         prefs.edit { putString(KEY_ID, id) }
-        Log.d(TAG, "created Riposo rule $id")
+        DiagLog.d(TAG, "created Riposo rule $id")
         return id
     }
 
@@ -51,7 +52,7 @@ class RiposoMode(private val context: Context) {
         nm.setAutomaticZenRuleState(
             id, Condition(CONDITION_ID, NAME, state, Condition.SOURCE_CONTEXT)
         )
-        Log.d(TAG, "Riposo -> $active")
+        DiagLog.d(TAG, "Riposo -> $active")
     }
 
     private fun buildRule(withGrayscale: Boolean): AutomaticZenRule {

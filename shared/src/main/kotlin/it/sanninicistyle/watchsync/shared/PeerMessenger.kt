@@ -19,20 +19,21 @@ class PeerMessenger(context: Context) {
                 .await()
                 .nodes
         } catch (e: Exception) {
-            Log.w(TAG, "peer lookup failed", e)
+            DiagLog.w(TAG, "peer lookup failed", e)
             return false
         }
         if (nodes.isEmpty()) {
-            Log.d(TAG, "no reachable peer for $path")
+            DiagLog.d(TAG, "no reachable peer for $path")
             return false
         }
         var delivered = false
         for (node in nodes) {
             try {
                 messageClient.sendMessage(node.id, path, data).await()
+                DiagLog.d(TAG, "sent $path to ${node.displayName}")
                 delivered = true
             } catch (e: Exception) {
-                Log.w(TAG, "send $path to ${node.displayName} failed", e)
+                DiagLog.w(TAG, "send $path to ${node.displayName} failed", e)
             }
         }
         return delivered
