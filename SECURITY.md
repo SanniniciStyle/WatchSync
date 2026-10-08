@@ -38,5 +38,13 @@ rather than flaws:
 | Trust manager accepting any certificate | `SslUtils` | same as above |
 | RSA without OAEP | `AndroidPubkey` | that code signs adb's authentication token (PKCS#1, as the protocol requires); it doesn't encrypt anything |
 
+A manual review focused on WatchSync's threat model (a device on the home network posing as the
+watch during setup) found the pairing sound — the SPAKE2 secret is bound to the TLS session as in
+Android's adb, and fails closed — and no leaks of keys or of the code. It found robustness issues:
+no limit on the packet size a peer may announce (an out-of-memory crash), no timeouts (a hang),
+unbounded buffering. WatchSync guards against these itself: every adb call runs under a time
+limit that drops the connection when it expires, and errors from the library, out-of-memory ones
+included, end the setup with an error instead of crashing the app.
+
 We also fixed a stream-handling bug in it while building WatchSync (upstream pull request
 [#35](https://github.com/MuntashirAkon/libadb-android/pull/35)).

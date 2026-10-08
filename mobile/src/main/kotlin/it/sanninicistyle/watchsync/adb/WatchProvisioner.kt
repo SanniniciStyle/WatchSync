@@ -104,7 +104,7 @@ class WatchProvisioner(private val context: Context) {
 
     private fun pair(pairing: AdbEndpoint, code: String) {
         val paired = try {
-            WatchAdbConnection.create(context).use { it.pair(pairing.host, pairing.port, code) }
+            WatchAdbConnection.create(context).use { deadline(PAIR_TIMEOUT_MS) { it.pair(pairing.host, pairing.port, code) } }
         } catch (e: Exception) {
             DiagLog.w(TAG, "pairing with $pairing failed: ${chain(e)}")
             // Unreachable address or closed port: a network problem, not the code
@@ -120,7 +120,7 @@ class WatchProvisioner(private val context: Context) {
         for (attempt in 1..4) {
             val adb = WatchAdbConnection.create(context)
             val ok = try {
-                adb.connect(endpoint.host, endpoint.port)
+                deadline(CONNECT_TIMEOUT_MS, adb::abort) { adb.connect(endpoint.host, endpoint.port) }
             } catch (e: Exception) {
                 DiagLog.w(TAG, "connect to $endpoint, attempt $attempt: ${chain(e)}")
                 false
@@ -185,6 +185,8 @@ class WatchProvisioner(private val context: Context) {
 
     private companion object {
         const val TAG = "WatchProvisioner"
+        const val PAIR_TIMEOUT_MS = 30_000L
+        const val CONNECT_TIMEOUT_MS = 20_000L
         const val STEP_MARK = "__ws_step_"
         val STEP = Regex("""${STEP_MARK}(\d+)=(\d+)""")
         val ADDRESS = Regex("""[0-9A-F]{2}(:[0-9A-F]{2}){5}""")

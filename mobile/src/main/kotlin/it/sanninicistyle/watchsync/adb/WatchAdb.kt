@@ -27,7 +27,12 @@ import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
 import java.security.spec.PKCS8EncodedKeySpec
 import java.util.Date
+import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /**
  * ADB client the phone uses to reach the watch's wireless debugging. Its identity (RSA key and
@@ -49,17 +54,25 @@ class WatchAdbConnection private constructor(
 
     /** Runs [command] in the watch's shell and returns its output and exit code. */
     fun shell(command: String): ShellResult {
-        val output = openStream("shell:$command; echo \"$EXIT_MARK$?\"").use { stream -> readAll(stream) }
+        val output = deadline(SHELL_TIMEOUT_MS, ::abort) {
+            openStream("shell:$command; echo \"$EXIT_MARK$?\"").use { stream -> readAll(stream) }
+        }
         val code = output.substringAfterLast(EXIT_MARK, "").trim().toIntOrNull() ?: -1
         return ShellResult(output.substringBeforeLast(EXIT_MARK).trim(), code).also {
             DiagLog.d(TAG, "$ $command -> ${it.code} ${it.output.take(200)}")
         }
     }
 
+    /** Drops the connection at once: unblocks any call stuck on a peer that stopped answering. */
+    fun abort() {
+        runCatching { adbConnection?.close() }
+    }
+
     /**
-     * Reads a shell stream to its end. libadb's InputStream reports EOF as soon as the stream is
-     * closed, dropping output still queued, and its read() throws when the close races the last
-     * chunk: read the stream itself and treat "closed" as the end.
+     * Reads a shell stream to its end. libadb 3.1.1 throws "Stream closed." when the peer's close
+     * races the last chunk, and can lose output queued at close: read the stream itself and treat
+     * "closed" as the end. Fixed upstream in MuntashirAkon/libadb-android#35; once a release
+     * includes it, this can go back to reading the stream's InputStream.
      */
     private fun readAll(stream: AdbStream): String {
         val out = ByteArrayOutputStream()
@@ -82,6 +95,7 @@ class WatchAdbConnection private constructor(
 
     companion object {
         private const val TAG = "WatchAdb"
+        private const val SHELL_TIMEOUT_MS = 30_000L
         private const val EXIT_MARK = "__ws_exit="
 
         fun create(context: Context): WatchAdbConnection {
@@ -105,6 +119,32 @@ class WatchAdbConnection private constructor(
             keyFile.writeBytes(pair.private.encoded)
             certFile.writeBytes(cert.encoded)
             return WatchAdbConnection(pair.private, cert)
+        }
+    }
+}
+
+private val deadlineThreads = Executors.newCachedThreadPool { task ->
+    Thread(task, "adb-call").apply { isDaemon = true }
+}
+
+/**
+ * Runs a blocking libadb call with a time limit. libadb has no timeouts of its own, so a peer that
+ * stops answering (or a device on the network posing as the watch) could otherwise hang the setup
+ * forever: on timeout [onTimeout] drops the connection and the call fails. Errors thrown by the
+ * library, even out-of-memory ones from oversized packets, become IOExceptions instead of crashing.
+ */
+internal fun <T> deadline(millis: Long, onTimeout: () -> Unit = {}, call: () -> T): T {
+    val future = deadlineThreads.submit(Callable(call))
+    return try {
+        future.get(millis, TimeUnit.MILLISECONDS)
+    } catch (e: TimeoutException) {
+        future.cancel(true)
+        runCatching(onTimeout)
+        throw IOException("adb call timed out after $millis ms", e)
+    } catch (e: ExecutionException) {
+        when (val cause = e.cause) {
+            is Exception -> throw cause
+            else -> throw IOException("adb call failed", cause)
         }
     }
 }
